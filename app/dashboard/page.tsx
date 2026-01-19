@@ -45,19 +45,25 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Météo du jour - Formulaire d'émotion */}
+      {/* Météo du jour - Bouton d'ajout d'émotion */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Sun className="h-5 w-5 text-primary" />
-            <CardTitle>Météo du jour</CardTitle>
+        <CardContent className="">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-full bg-primary/10">
+                <Sun className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Météo du jour</h3>
+                <p className="text-sm text-muted-foreground">
+                  {todayEntries.length > 0 
+                    ? `${todayEntries.length} entrée${todayEntries.length > 1 ? 's' : ''} aujourd'hui`
+                    : 'Aucune entrée aujourd\'hui'}
+                </p>
+              </div>
+            </div>
+            <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} />
           </div>
-          <CardDescription>
-            Enregistrez votre état émotionnel actuel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} />
         </CardContent>
       </Card>
 

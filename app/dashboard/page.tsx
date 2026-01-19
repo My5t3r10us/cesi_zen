@@ -26,16 +26,16 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header de bienvenue */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
             {greeting()}, {session?.prenom || 'cher utilisateur'} 👋
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">
             Comment vous sentez-vous aujourd&apos;hui ?
           </p>
         </div>
-        <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
           <Calendar className="h-4 w-4" />
           {new Date().toLocaleDateString('fr-FR', { 
             weekday: 'long', 
@@ -47,59 +47,61 @@ export default async function DashboardPage() {
 
       {/* Météo du jour - Bouton d'ajout d'émotion */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
-        <CardContent className="">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-primary/10">
-                <Sun className="h-6 w-6 text-primary" />
+              <div className="p-2 md:p-3 rounded-full bg-primary/10">
+                <Sun className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Météo du jour</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold text-base md:text-lg">Météo du jour</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">
                   {todayEntries.length > 0 
                     ? `${todayEntries.length} entrée${todayEntries.length > 1 ? 's' : ''} aujourd'hui`
                     : 'Aucune entrée aujourd\'hui'}
                 </p>
               </div>
             </div>
-            <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} />
+            <div className="w-full sm:w-auto">
+              <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} />
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Stats rapides */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{stats?.totalEntries || 0}</div>
-            <p className="text-sm text-muted-foreground">Entrées ce mois</p>
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold text-primary">{stats?.totalEntries || 0}</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Entrées ce mois</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{todayEntries.length}</div>
-            <p className="text-sm text-muted-foreground">Entrées aujourd&apos;hui</p>
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold text-primary">{todayEntries.length}</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Entrées aujourd&apos;hui</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold text-primary">
               {stats?.dailyAverages?.length || 0}
             </div>
-            <p className="text-sm text-muted-foreground">Jours actifs</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Jours actifs</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center gap-1">
-              <TrendingUp className="h-5 w-5 text-green-500" />
-              <span className="text-2xl font-bold text-primary">
+              <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
+              <span className="text-xl md:text-2xl font-bold text-primary">
                 {stats?.dailyAverages?.length 
                   ? Math.round(stats.dailyAverages.reduce((a, b) => a + b.averageIntensity, 0) / stats.dailyAverages.length * 10) / 10
                   : '-'}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">Intensité moyenne</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Intensité moyenne</p>
           </CardContent>
         </Card>
       </div>
@@ -107,13 +109,13 @@ export default async function DashboardPage() {
       {/* Graphique d'évolution */}
       {stats?.dailyAverages && stats.dailyAverages.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Évolution de votre humeur</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-2 md:pb-6">
+            <CardTitle className="text-base md:text-lg">Évolution de votre humeur</CardTitle>
+            <CardDescription className="text-xs md:text-sm">
               Tendances des 30 derniers jours
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 md:px-6">
             <MoodChart data={stats.dailyAverages} />
           </CardContent>
         </Card>
@@ -121,13 +123,13 @@ export default async function DashboardPage() {
 
       {/* Entrées récentes */}
       <Card>
-        <CardHeader>
-          <CardTitle>Entrées récentes</CardTitle>
-          <CardDescription>
+        <CardHeader className="pb-2 md:pb-6">
+          <CardTitle className="text-base md:text-lg">Entrées récentes</CardTitle>
+          <CardDescription className="text-xs md:text-sm">
             Vos dernières humeurs enregistrées
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 md:px-6">
           <RecentEntries />
         </CardContent>
       </Card>

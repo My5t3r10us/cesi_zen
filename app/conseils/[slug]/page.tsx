@@ -64,9 +64,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <div className="min-h-screen bg-background">
       <Header user={session ? { email: session.email, nom: session.nom, prenom: session.prenom, role: session.role } : undefined} />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-3xl mx-auto">
-          <Button variant="ghost" asChild className="mb-6">
+          <Button variant="ghost" asChild className="mb-4 md:mb-6 -ml-2">
             <Link href="/conseils">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour aux conseils
@@ -74,40 +74,40 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </Button>
 
           <article>
-            <header className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm mb-4">
+            <header className="mb-6 md:mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs md:text-sm mb-3 md:mb-4">
                 <BookOpen className="h-3 w-3" />
                 Article
               </div>
               
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
                 {article.title}
               </h1>
               
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
+                  <User className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   {article.author?.prenom} {article.author?.nom || article.author?.email}
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   {format(new Date(article.createdAt), 'dd MMMM yyyy', { locale: fr })}
                 </div>
               </div>
             </header>
 
             <Card>
-              <CardContent className="py-8 prose prose-lg max-w-none">
+              <CardContent className="py-6 md:py-8 px-4 md:px-6 prose prose-sm md:prose-lg max-w-none">
                 {renderContent(article.content)}
               </CardContent>
             </Card>
           </article>
 
-          <div className="mt-8 text-center">
-            <p className="text-muted-foreground mb-4">
+          <div className="mt-6 md:mt-8 text-center">
+            <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
               Cet article vous a été utile ?
             </p>
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <Link href="/register">
                 Créez votre compte CESIZen
               </Link>

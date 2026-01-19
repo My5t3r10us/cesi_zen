@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Leaf, LogOut, Settings, User } from 'lucide-react';
+import { Leaf, LogOut, Settings, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getInitials = () => {
     if (user?.prenom && user?.nom) {
@@ -32,6 +34,9 @@ export function Header({ user }: HeaderProps) {
     }
     return user?.email?.[0]?.toUpperCase() || 'U';
   };
+
+  const isDashboard = pathname.startsWith('/dashboard');
+  const isAdmin = pathname.startsWith('/admin');
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -83,6 +88,17 @@ export function Header({ user }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Mobile menu button - only show on pages without bottom nav */}
+          {!isDashboard && !isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          )}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -139,6 +155,73 @@ export function Header({ user }: HeaderProps) {
           )}
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && !isDashboard && !isAdmin && (
+        <div className="md:hidden border-t border-border bg-background">
+          <nav className="container mx-auto px-4 py-4 space-y-3">
+            <Link 
+              href="/conseils" 
+              className={`block py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                pathname.startsWith('/conseils') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Conseils
+            </Link>
+            {user ? (
+              <>
+                <Link 
+                  href="/dashboard" 
+                  className={`block py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    pathname === '/dashboard' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Mon Espace
+                </Link>
+                <Link 
+                  href="/dashboard/statistiques" 
+                  className={`block py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    pathname === '/dashboard/statistiques' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Statistiques
+                </Link>
+                {user.role === 'admin' && (
+                  <Link 
+                    href="/admin" 
+                    className={`block py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      pathname.startsWith('/admin') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Administration
+                  </Link>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                <Link 
+                  href="/login" 
+                  className="block py-2 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Connexion
+                </Link>
+                <Link 
+                  href="/register" 
+                  className="block py-2 px-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  S&apos;inscrire
+                </Link>
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

@@ -13,10 +13,10 @@ export default async function AdminUsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-          <Users className="h-7 w-7 text-primary" />
+          <Users className="h-6 w-6 md:h-7 md:w-7 text-primary" />
           Utilisateurs
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-muted-foreground mt-1 text-sm md:text-base">
           Gérez les comptes utilisateurs
         </p>
       </div>
@@ -34,10 +34,10 @@ export default async function AdminUsersPage() {
         {users.map((user) => (
           <Card key={user.id} className={user.isBanned ? 'border-destructive/50 bg-destructive/5' : ''}>
             <CardContent className="py-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="font-semibold truncate">
                       {user.prenom} {user.nom || user.email}
                     </span>
                     <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
@@ -47,16 +47,18 @@ export default async function AdminUsersPage() {
                       <Badge variant="destructive">Banni</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground truncate">
                     {user.email}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Inscrit le {format(new Date(user.createdAt), 'dd MMMM yyyy', { locale: fr })}
+                    Inscrit le {format(new Date(user.createdAt), 'dd MMM yyyy', { locale: fr })}
                   </p>
                 </div>
                 
                 {user.role !== 'admin' && (
-                  <BanUserButton userId={user.id} isBanned={user.isBanned} />
+                  <div className="self-end sm:self-center">
+                    <BanUserButton userId={user.id} isBanned={user.isBanned} />
+                  </div>
                 )}
               </div>
             </CardContent>

@@ -13,22 +13,22 @@ export default async function EmotionsAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-            <Heart className="h-7 w-7 text-primary" />
+            <Heart className="h-6 w-6 md:h-7 md:w-7 text-primary" />
             Gestion des Émotions
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">
             Gérez les catégories et émotions du référentiel
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/admin/emotions/categories/new">
-            <Button variant="outline">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Link href="/admin/emotions/categories/new" className="flex-1 sm:flex-none">
+            <Button variant="outline" className="w-full">
               <Plus className="h-4 w-4 mr-2" />
               Catégorie
             </Button>
           </Link>
-          <Link href="/admin/emotions/new">
-            <Button>
+          <Link href="/admin/emotions/new" className="flex-1 sm:flex-none">
+            <Button className="w-full">
               <Plus className="h-4 w-4 mr-2" />
               Émotion
             </Button>
@@ -66,16 +66,16 @@ export default async function EmotionsAdminPage() {
           <CardDescription>Vue d&apos;ensemble du référentiel</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{categories.length}</div>
-              <div className="text-sm text-muted-foreground">Catégories</div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 md:p-4 bg-muted/50 rounded-lg">
+              <div className="text-xl md:text-2xl font-bold text-primary">{categories.length}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Catégories</div>
             </div>
-            <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <div className="text-2xl font-bold text-primary">
+            <div className="text-center p-3 md:p-4 bg-muted/50 rounded-lg">
+              <div className="text-xl md:text-2xl font-bold text-primary">
                 {categories.reduce((acc, cat) => acc + (cat.emotions?.length || 0), 0)}
               </div>
-              <div className="text-sm text-muted-foreground">Émotions</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Émotions</div>
             </div>
           </div>
         </CardContent>

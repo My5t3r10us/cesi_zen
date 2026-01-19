@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌿 CESIZen - Application de Bien-être Mental
 
-## Getting Started
+Application Web & PWA de santé mentale développée pour le Ministère.
 
-First, run the development server:
+## Fonctionnalités
+
+### Citoyens
+- **Journal émotionnel** : Enregistrez vos émotions avec intensité et notes privées
+- **Météo du jour** : Visualisez rapidement votre état émotionnel  
+- **Calendrier interactif** : Consultez l'historique de vos entrées
+- **Graphiques d'évolution** : Analysez vos tendances (Recharts)
+- **Notes chiffrées** : AES-256-GCM côté serveur
+
+### Administrateurs
+- **CMS Articles** : Créez et gérez des articles de conseils
+- **Gestion utilisateurs** : Bannissement (sans accès aux notes)
+
+## Stack Technique
+
+- Next.js 16+ (App Router), TypeScript
+- PostgreSQL, Drizzle ORM
+- Tailwind CSS v4, Shadcn UI
+- Sessions JWT (jose), Recharts, Zod
+
+## Installation
 
 ```bash
+# 1. Cloner et installer
+npm install
+
+# 2. Configurer l'environnement
+cp .env.example .env
+# Éditer .env avec vos valeurs
+
+# 3. Setup base de données
+npm run db:setup
+
+# 4. Lancer le serveur
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables d'environnement
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/cesizen"
+JWT_SECRET="votre-cle-secrete-jwt"
+ENCRYPTION_KEY="64-caracteres-hex-pour-aes-256"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+- `npm run dev` : Serveur de développement
+- `npm run db:generate` : Générer les migrations
+- `npm run db:migrate` : Appliquer les migrations
+- `npm run db:seed` : Seed des émotions et admin
+- `npm run db:setup` : Setup complet BDD
 
-To learn more about Next.js, take a look at the following resources:
+## Comptes par défaut
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Après le seed :
+- **Admin** : admin@cesizen.fr / Admin123!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Licence
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+© 2025 CESIZen - Ministère de la Santé

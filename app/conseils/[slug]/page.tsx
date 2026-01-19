@@ -1,0 +1,120 @@
+import { getArticleBySlug, getArticles } from '@/lib/actions/articles';
+import { getSession } from '@/lib/auth/session';
+import { Header } from '@/components/layout/header';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, BookOpen, Calendar, User } from 'lucide-react';
+import Link from 'next/link';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { notFound } from 'next/navigation';
+
+interface ArticlePageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const articles = await getArticles(true);
+  return articles.map((article) => ({
+    slug: article.slug,
+  }));
+}
+
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { slug } = await params;
+  const session = await getSession();
+  const article = await getArticleBySlug(slug);
+
+  if (!article || !article.isPublished) {
+    notFound();
+  }
+
+  // Simple markdown to HTML conversion
+  const renderContent = (content: string) => {
+    return content
+      .split('\n\n')
+      .map((paragraph, index) => {
+        // Headers
+        if (paragraph.startsWith('# ')) {
+          return <h1 key={index} className="text-3xl font-bold mt-8 mb-4">{paragraph.slice(2)}</h1>;
+        }
+        if (paragraph.startsWith('## ')) {
+          return <h2 key={index} className="text-2xl font-semibold mt-6 mb-3">{paragraph.slice(3)}</h2>;
+        }
+        if (paragraph.startsWith('### ')) {
+          return <h3 key={index} className="text-xl font-semibold mt-4 mb-2">{paragraph.slice(4)}</h3>;
+        }
+        // Lists
+        if (paragraph.startsWith('- ')) {
+          const items = paragraph.split('\n').filter(line => line.startsWith('- '));
+          return (
+            <ul key={index} className="list-disc list-inside space-y-2 my-4">
+              {items.map((item, i) => (
+                <li key={i} className="text-muted-foreground">{item.slice(2)}</li>
+              ))}
+            </ul>
+          );
+        }
+        // Regular paragraph
+        return <p key={index} className="text-muted-foreground leading-relaxed my-4">{paragraph}</p>;
+      });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header user={session ? { email: session.email, nom: session.nom, prenom: session.prenom, role: session.role } : undefined} />
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          <Button variant="ghost" asChild className="mb-6">
+            <Link href="/conseils">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour aux conseils
+            </Link>
+          </Button>
+
+          <article>
+            <header className="mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm mb-4">
+                <BookOpen className="h-3 w-3" />
+                Article
+              </div>
+              
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                {article.title}
+              </h1>
+              
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  {article.author?.prenom} {article.author?.nom || article.author?.email}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {format(new Date(article.createdAt), 'dd MMMM yyyy', { locale: fr })}
+                </div>
+              </div>
+            </header>
+
+            <Card>
+              <CardContent className="py-8 prose prose-lg max-w-none">
+                {renderContent(article.content)}
+              </CardContent>
+            </Card>
+          </article>
+
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground mb-4">
+              Cet article vous a été utile ?
+            </p>
+            <Button asChild>
+              <Link href="/register">
+                Créez votre compte CESIZen
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

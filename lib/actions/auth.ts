@@ -6,9 +6,11 @@ import { hashPassword, verifyPassword } from '@/lib/auth/password';
 import { createSession, deleteSession } from '@/lib/auth/session';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import { registerSchema, loginSchema } from '@/lib/validation/schemas';
 
 export type AuthState = {
   error?: string;
+  fieldErrors?: Record<string, string[]>;
   success?: boolean;
 };
 
@@ -16,23 +18,25 @@ export async function register(
   prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const nom = formData.get('nom') as string;
-  const prenom = formData.get('prenom') as string;
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
+  const rawData = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+    confirmPassword: formData.get('confirmPassword') as string,
+    nom: formData.get('nom') as string || undefined,
+    prenom: formData.get('prenom') as string || undefined,
+  };
 
-  if (!nom || !prenom || !email || !password) {
-    return { error: 'Tous les champs sont requis' };
+  // Validation Zod
+  const validationResult = registerSchema.safeParse(rawData);
+  
+  if (!validationResult.success) {
+    return { 
+      error: 'Validation échouée',
+      fieldErrors: validationResult.error.flatten().fieldErrors as Record<string, string[]>
+    };
   }
 
-  if (password !== confirmPassword) {
-    return { error: 'Les mots de passe ne correspondent pas' };
-  }
-
-  if (password.length < 6) {
-    return { error: 'Le mot de passe doit contenir au moins 6 caractères' };
-  }
+  const { email, password, nom, prenom } = validationResult.data;
 
   try {
     const existingUser = await db.query.users.findFirst({
@@ -43,15 +47,15 @@ export async function register(
       return { error: 'Un compte avec cet email existe déjà' };
     }
 
-    const hashedPassword = hashPassword(password);
+    const passwordHash = hashPassword(password);
 
     const [newUser] = await db
       .insert(users)
       .values({
+        email,
+        passwordHash,
         nom,
         prenom,
-        email,
-        password: hashedPassword,
         role: 'user',
       })
       .returning();
@@ -62,19 +66,29 @@ export async function register(
     return { error: 'Une erreur est survenue lors de l\'inscription' };
   }
 
-  redirect('/app');
+  redirect('/dashboard');
 }
 
 export async function login(
   prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const rawData = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  };
 
-  if (!email || !password) {
-    return { error: 'Email et mot de passe requis' };
+  // Validation Zod
+  const validationResult = loginSchema.safeParse(rawData);
+  
+  if (!validationResult.success) {
+    return { 
+      error: 'Validation échouée',
+      fieldErrors: validationResult.error.flatten().fieldErrors as Record<string, string[]>
+    };
   }
+
+  const { email, password } = validationResult.data;
 
   try {
     const user = await db.query.users.findFirst({
@@ -85,7 +99,12 @@ export async function login(
       return { error: 'Email ou mot de passe incorrect' };
     }
 
-    const isValidPassword = verifyPassword(password, user.password);
+    // Vérifier si l'utilisateur est banni
+    if (user.isBanned) {
+      return { error: 'Votre compte a été suspendu. Contactez l\'administrateur.' };
+    }
+
+    const isValidPassword = verifyPassword(password, user.passwordHash);
 
     if (!isValidPassword) {
       return { error: 'Email ou mot de passe incorrect' };
@@ -97,7 +116,7 @@ export async function login(
     return { error: 'Une erreur est survenue lors de la connexion' };
   }
 
-  redirect('/app');
+  redirect('/dashboard');
 }
 
 export async function logout(): Promise<void> {

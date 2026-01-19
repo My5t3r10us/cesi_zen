@@ -1,138 +1,111 @@
-import { getSession } from '@/lib/auth/session';
-import { logout } from '@/lib/actions/auth';
-import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
+import { getAdminStats } from '@/lib/actions/admin';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, FileText, ShieldAlert, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function AdminDashboard() {
-  const session = await getSession();
-  const allUsers = await db.select({
-    id: users.id,
-    nom: users.nom,
-    prenom: users.prenom,
-    email: users.email,
-    role: users.role,
-    createdAt: users.createdAt,
-  }).from(users);
+  const stats = await getAdminStats();
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="text-2xl font-bold text-white">
-                MyApp
-              </Link>
-              <span className="px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded">
-                ADMIN
-              </span>
-            </div>
-            <div className="flex items-center gap-6">
-              <Link href="/app" className="text-slate-300 hover:text-white font-medium">
-                Dashboard
-              </Link>
-              <Link href="/admin" className="text-white font-medium">
-                Admin
-              </Link>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-slate-400">
-                  {session?.email}
-                </span>
-                <form action={logout}>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
-                  >
-                    Déconnexion
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+          Tableau de bord Admin
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Vue d&apos;ensemble de l&apos;application CESIZen
+        </p>
+      </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        <div className="max-w-6xl">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Panel Administrateur
-          </h1>
-          <p className="text-slate-400 mb-8">
-            Gérez les utilisateurs et les paramètres de l&apos;application.
-          </p>
+      {/* Warning Box */}
+      <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
+        <p className="text-destructive text-sm flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4" />
+          Cette zone est réservée aux administrateurs. Les notes des utilisateurs sont chiffrées et inaccessibles.
+        </p>
+      </div>
 
-          {/* Warning Box */}
-          <div className="p-4 bg-red-900/30 border border-red-700 rounded-xl mb-8">
-            <p className="text-red-300 text-sm">
-              ⚠️ Cette zone est réservée aux administrateurs. Toutes les actions sont enregistrées.
-            </p>
-          </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold">{stats?.totalUsers || 0}</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Utilisateurs totaux</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-green-500" />
+              <span className="text-2xl font-bold">{stats?.newUsersThisWeek || 0}</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Nouveaux cette semaine</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-accent" />
+              <span className="text-2xl font-bold">{stats?.publishedArticles || 0}/{stats?.totalArticles || 0}</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Articles publiés</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-destructive" />
+              <span className="text-2xl font-bold">{stats?.bannedUsers || 0}</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Utilisateurs bannis</p>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Users Table */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-700">
-              <h2 className="text-xl font-semibold text-white">
-                Utilisateurs ({allUsers.length})
-              </h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-700/50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Nom
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Rôle
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Créé le
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700">
-                  {allUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-700/30">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                        {user.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                        {user.prenom} {user.nom}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded ${
-                            user.role === 'admin'
-                              ? 'bg-red-600 text-white'
-                              : 'bg-blue-600 text-white'
-                          }`}
-                        >
-                          {user.role}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                        {user.createdAt.toLocaleDateString('fr-FR')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </main>
+      {/* Quick Actions */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Gestion des articles</CardTitle>
+            <CardDescription>
+              Créez et gérez les articles de conseils
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link 
+              href="/admin/articles" 
+              className="inline-flex items-center gap-2 text-primary hover:underline"
+            >
+              <FileText className="h-4 w-4" />
+              Accéder aux articles →
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Gestion des utilisateurs</CardTitle>
+            <CardDescription>
+              Gérez les comptes et les bannissements
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link 
+              href="/admin/users" 
+              className="inline-flex items-center gap-2 text-primary hover:underline"
+            >
+              <Users className="h-4 w-4" />
+              Accéder aux utilisateurs →
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,85 @@
+import { getEmotionCategories } from '@/lib/actions/emotions';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Heart, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { CategoryCard } from '@/components/admin/category-card';
+
+export default async function EmotionsAdminPage() {
+  const categories = await getEmotionCategories();
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+            <Heart className="h-7 w-7 text-primary" />
+            Gestion des Émotions
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gérez les catégories et émotions du référentiel
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/admin/emotions/categories/new">
+            <Button variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              Catégorie
+            </Button>
+          </Link>
+          <Link href="/admin/emotions/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Émotion
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {categories.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium">Aucune catégorie</h3>
+            <p className="text-muted-foreground mt-1">
+              Commencez par créer une catégorie d&apos;émotions
+            </p>
+            <Link href="/admin/emotions/categories/new">
+              <Button className="mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                Créer une catégorie
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-6">
+          {categories.map((category) => (
+            <CategoryCard key={category.id} category={category} />
+          ))}
+        </div>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Statistiques</CardTitle>
+          <CardDescription>Vue d&apos;ensemble du référentiel</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <div className="text-2xl font-bold text-primary">{categories.length}</div>
+              <div className="text-sm text-muted-foreground">Catégories</div>
+            </div>
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <div className="text-2xl font-bold text-primary">
+                {categories.reduce((acc, cat) => acc + (cat.emotions?.length || 0), 0)}
+              </div>
+              <div className="text-sm text-muted-foreground">Émotions</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

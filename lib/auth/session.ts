@@ -5,9 +5,11 @@ import { User } from '@/lib/db/schema';
 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-change-in-production');
 
 export interface SessionPayload {
-  userId: number;
+  userId: string; // UUID
   email: string;
   role: 'user' | 'admin';
+  nom?: string | null;
+  prenom?: string | null;
   expiresAt: Date;
 }
 
@@ -18,6 +20,8 @@ export async function createSession(user: User): Promise<string> {
     userId: user.id,
     email: user.email,
     role: user.role,
+    nom: user.nom,
+    prenom: user.prenom,
     expiresAt: expiresAt.toISOString(),
   })
     .setProtectedHeader({ alg: 'HS256' })

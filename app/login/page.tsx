@@ -3,72 +3,92 @@
 import { useActionState } from 'react';
 import { login, AuthState } from '@/lib/actions/auth';
 import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Leaf, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(login, {});
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 to-slate-800">
-      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
-        <h1 className="text-3xl font-bold text-center text-slate-800 mb-8">Connexion</h1>
-        
-        <form action={formAction} className="space-y-6">
-          {state.error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {state.error}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-secondary/30 to-background p-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-2">
+          <div className="flex justify-center mb-2">
+            <div className="p-3 rounded-full bg-primary/10">
+              <Leaf className="h-8 w-8 text-primary" />
             </div>
-          )}
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="votre@email.com"
-            />
           </div>
+          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardDescription>
+            Accédez à votre espace bien-être
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={formAction} className="space-y-4">
+            {state.error && (
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+                {state.error}
+              </div>
+            )}
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="••••••••"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                id="email"
+                name="email"
+                required
+                placeholder="votre@email.com"
+                className="h-11"
+              />
+              {state.fieldErrors?.email && (
+                <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                type="password"
+                id="password"
+                name="password"
+                required
+                placeholder="••••••••"
+                className="h-11"
+              />
+              {state.fieldErrors?.password && (
+                <p className="text-sm text-destructive">{state.fieldErrors.password[0]}</p>
+              )}
+            </div>
+
+            <Button type="submit" disabled={pending} className="w-full h-11">
+              {pending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connexion...
+                </>
+              ) : (
+                'Se connecter'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Pas encore de compte ?{' '}
+              <Link href="/register" className="text-primary hover:underline font-medium">
+                S&apos;inscrire
+              </Link>
+            </p>
+            <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition inline-block">
+              ← Retour à l&apos;accueil
+            </Link>
           </div>
-
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {pending ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-slate-600">
-          Pas encore de compte ?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline font-medium">
-            S&apos;inscrire
-          </Link>
-        </p>
-
-        <p className="mt-4 text-center">
-          <Link href="/" className="text-slate-500 hover:text-slate-700 text-sm">
-            ← Retour à l&apos;accueil
-          </Link>
-        </p>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

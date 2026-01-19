@@ -8,10 +8,10 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if route needs protection
-  const isAppRoute = pathname.startsWith('/app');
+  const isDashboardRoute = pathname.startsWith('/dashboard');
   const isAdminRoute = pathname.startsWith('/admin');
 
-  if (!isAppRoute && !isAdminRoute) {
+  if (!isDashboardRoute && !isAdminRoute) {
     return NextResponse.next();
   }
 
@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
     
     // Check admin access
     if (isAdminRoute && payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/app', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
     return NextResponse.next();
@@ -39,5 +39,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
 };

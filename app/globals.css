@@ -48,37 +48,48 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Design System CESIZen - Ambiance Zen */
+  /* Couleurs principales: Vert Sauge #8A9A5B, Beige #F5F5DC, Bleu Ciel #87CEEB */
+  --background: #FAFAF5; /* Beige très clair */
+  --foreground: #2D3B2D; /* Vert foncé pour le texte */
+  --card: #FFFFFF;
+  --card-foreground: #2D3B2D;
+  --popover: #FFFFFF;
+  --popover-foreground: #2D3B2D;
+  --primary: #8A9A5B; /* Vert Sauge */
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5DC; /* Beige */
+  --secondary-foreground: #2D3B2D;
+  --muted: #E8EBE0; /* Beige/vert très clair */
+  --muted-foreground: #5A6B5A;
+  --accent: #87CEEB; /* Bleu Ciel */
+  --accent-foreground: #1A2A1A;
+  --destructive: #E57373;
+  --border: #D4DBC8; /* Bordure vert très clair */
+  --input: #E8EBE0;
+  --ring: #8A9A5B;
+  /* Couleurs pour les graphiques */
+  --chart-1: #8A9A5B; /* Vert Sauge */
+  --chart-2: #87CEEB; /* Bleu Ciel */
+  --chart-3: #F0E68C; /* Khaki clair */
+  --chart-4: #DDA0DD; /* Plum */
+  --chart-5: #98D8C8; /* Menthe */
+  /* Sidebar */
+  --sidebar: #F5F5DC;
+  --sidebar-foreground: #2D3B2D;
+  --sidebar-primary: #8A9A5B;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8EBE0;
+  --sidebar-accent-foreground: #2D3B2D;
+  --sidebar-border: #D4DBC8;
+  --sidebar-ring: #8A9A5B;
+  /* Couleurs émotions */
+  --emotion-joy: #FFD700;
+  --emotion-calm: #87CEEB;
+  --emotion-energy: #FFA500;
+  --emotion-sadness: #6495ED;
+  --emotion-anxiety: #9370DB;
+  --emotion-anger: #FF6B6B;
 }
 
 .dark {

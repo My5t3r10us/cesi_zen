@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { db } from './index';
-import { emotionCategories, emotions, users } from './schema';
+import { emotionCategories, emotions, users, articleCategories } from './schema';
 import { hashPassword } from '../auth/password';
 import { eq } from 'drizzle-orm';
 
@@ -23,6 +23,16 @@ const emotionsByCategory: Record<string, string[]> = {
   'Surprise': ['Étonnement', 'Stupéfaction', 'Sidération', 'Incrédulité', 'Émerveillement', 'Confusion'],
   'Dégoût': ['Répulsion', 'Déplaisir', 'Nausée', 'Dédain', 'Horreur', 'Dégoût profond'],
 };
+
+// Catégories d'articles
+const articleCats = [
+  { label: 'Bien-être', slug: 'bien-etre', colorHex: '#8A9A5B' },
+  { label: 'Méditation', slug: 'meditation', colorHex: '#7B68EE' },
+  { label: 'Sommeil', slug: 'sommeil', colorHex: '#4682B4' },
+  { label: 'Nutrition', slug: 'nutrition', colorHex: '#32CD32' },
+  { label: 'Sport', slug: 'sport', colorHex: '#FF6347' },
+  { label: 'Santé mentale', slug: 'sante-mentale', colorHex: '#DDA0DD' },
+];
 
 async function seed() {
   console.log('🌱 Seeding database...');
@@ -53,6 +63,13 @@ async function seed() {
     }
   }
   console.log(`✅ ${emotionCount} emotions seeded`);
+
+  // Seed article categories
+  console.log('📰 Seeding article categories...');
+  for (const cat of articleCats) {
+    await db.insert(articleCategories).values(cat).onConflictDoNothing();
+  }
+  console.log(`✅ ${articleCats.length} article categories seeded`);
 
   // Seed admin user
   console.log('👤 Creating admin user...');

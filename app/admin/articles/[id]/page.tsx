@@ -1,4 +1,4 @@
-import { getArticleById } from '@/lib/actions/articles';
+import { getArticleById, getArticleCategories } from '@/lib/actions/articles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArticleForm } from '@/components/admin/article-form';
 import { FileText } from 'lucide-react';
@@ -10,7 +10,10 @@ interface EditArticlePageProps {
 
 export default async function EditArticlePage({ params }: EditArticlePageProps) {
   const { id } = await params;
-  const article = await getArticleById(id);
+  const [article, categories] = await Promise.all([
+    getArticleById(id),
+    getArticleCategories(),
+  ]);
 
   if (!article) {
     notFound();
@@ -36,7 +39,7 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ArticleForm article={article} />
+          <ArticleForm article={article} categories={categories} />
         </CardContent>
       </Card>
     </div>

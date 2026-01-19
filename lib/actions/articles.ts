@@ -1,10 +1,10 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { articles } from '@/lib/db/schema';
+import { articles, articleCategories } from '@/lib/db/schema';
 import { getSession } from '@/lib/auth/session';
 import { articleSchema } from '@/lib/validation/schemas';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, asc, ilike, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 export type ArticleState = {
@@ -27,6 +27,9 @@ export async function createArticle(
     title: formData.get('title') as string,
     slug: formData.get('slug') as string,
     content: formData.get('content') as string,
+    excerpt: formData.get('excerpt') as string || null,
+    coverImage: formData.get('coverImage') as string || null,
+    categoryId: formData.get('categoryId') ? parseInt(formData.get('categoryId') as string) : null,
     isPublished: formData.get('isPublished') === 'true',
   };
 
@@ -55,6 +58,9 @@ export async function createArticle(
       title,
       slug,
       content,
+      excerpt: rawData.excerpt,
+      coverImage: rawData.coverImage,
+      categoryId: rawData.categoryId,
       isPublished,
       authorId: session.userId,
     });
@@ -83,6 +89,9 @@ export async function updateArticle(
     title: formData.get('title') as string,
     slug: formData.get('slug') as string,
     content: formData.get('content') as string,
+    excerpt: formData.get('excerpt') as string || null,
+    coverImage: formData.get('coverImage') as string || null,
+    categoryId: formData.get('categoryId') ? parseInt(formData.get('categoryId') as string) : null,
     isPublished: formData.get('isPublished') === 'true',
   };
 
@@ -112,6 +121,9 @@ export async function updateArticle(
         title,
         slug,
         content,
+        excerpt: rawData.excerpt,
+        coverImage: rawData.coverImage,
+        categoryId: rawData.categoryId,
         isPublished,
         updatedAt: new Date(),
       })
@@ -160,6 +172,7 @@ export async function getArticles(publishedOnly: boolean = false) {
               prenom: true,
             },
           },
+          category: true,
         },
         orderBy: [desc(articles.createdAt)],
       });
@@ -175,11 +188,23 @@ export async function getArticles(publishedOnly: boolean = false) {
             prenom: true,
           },
         },
+        category: true,
       },
       orderBy: [desc(articles.createdAt)],
     });
   } catch (error) {
     console.error('Get articles error:', error);
+    return [];
+  }
+}
+
+export async function getArticleCategories() {
+  try {
+    return await db.query.articleCategories.findMany({
+      orderBy: [asc(articleCategories.label)],
+    });
+  } catch (error) {
+    console.error('Get article categories error:', error);
     return [];
   }
 }

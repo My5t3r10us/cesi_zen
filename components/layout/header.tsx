@@ -55,10 +55,18 @@ export function Header({ user }: HeaderProps) {
               <Link 
                 href="/dashboard" 
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname.startsWith('/dashboard') ? 'text-primary' : 'text-muted-foreground'
+                  pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground'
                 }`}
               >
                 Mon Espace
+              </Link>
+              <Link 
+                href="/dashboard/statistiques" 
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname === '/dashboard/statistiques' ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                Statistiques
               </Link>
               {user.role === 'admin' && (
                 <Link 

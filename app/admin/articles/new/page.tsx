@@ -1,8 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArticleForm } from '@/components/admin/article-form';
+import { getArticleCategories } from '@/lib/actions/articles';
 import { FileText } from 'lucide-react';
 
-export default function NewArticlePage() {
+export default async function NewArticlePage() {
+  const categories = await getArticleCategories();
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
@@ -23,7 +26,7 @@ export default function NewArticlePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ArticleForm />
+          <ArticleForm categories={categories} />
         </CardContent>
       </Card>
     </div>

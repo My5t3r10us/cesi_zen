@@ -7,19 +7,30 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Article } from '@/lib/db/schema';
+import { Article, ArticleCategory } from '@/lib/db/schema';
 
 interface ArticleFormProps {
   article?: Article;
+  categories?: ArticleCategory[];
 }
 
-export function ArticleForm({ article }: ArticleFormProps) {
+export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(article?.title || '');
   const [slug, setSlug] = useState(article?.slug || '');
+  const [excerpt, setExcerpt] = useState(article?.excerpt || '');
+  const [coverImage, setCoverImage] = useState(article?.coverImage || '');
+  const [categoryId, setCategoryId] = useState<string>(article?.categoryId?.toString() || '');
   const [isPublished, setIsPublished] = useState(article?.isPublished || false);
 
   // Auto-generate slug from title
@@ -94,6 +105,56 @@ export function ArticleForm({ article }: ArticleFormProps) {
         {state.fieldErrors?.slug && (
           <p className="text-sm text-destructive">{state.fieldErrors.slug[0]}</p>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="categoryId">Catégorie</Label>
+          <Select value={categoryId} onValueChange={setCategoryId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une catégorie" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id.toString()}>
+                  <span className="flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: cat.colorHex }}
+                    />
+                    {cat.label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <input type="hidden" name="categoryId" value={categoryId} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="coverImage">Image de couverture (URL)</Label>
+          <Input
+            type="url"
+            id="coverImage"
+            name="coverImage"
+            value={coverImage}
+            onChange={(e) => setCoverImage(e.target.value)}
+            placeholder="https://example.com/image.jpg"
+            className="h-11"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="excerpt">Résumé (optionnel)</Label>
+        <Textarea
+          id="excerpt"
+          name="excerpt"
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
+          placeholder="Un court résumé de l'article..."
+          rows={2}
+        />
       </div>
 
       <div className="space-y-2">

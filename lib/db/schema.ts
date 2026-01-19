@@ -56,12 +56,24 @@ export const entries = pgTable('entries', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Table Catégories d'articles
+export const articleCategories = pgTable('article_categories', {
+  id: serial('id').primaryKey(),
+  label: varchar('label', { length: 100 }).notNull().unique(),
+  slug: varchar('slug', { length: 100 }).notNull().unique(),
+  colorHex: varchar('color_hex', { length: 7 }).notNull().default('#8A9A5B'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Table Articles (CMS)
 export const articles = pgTable('articles', {
   id: uuid('id').defaultRandom().primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   content: text('content').notNull(), // Markdown/HTML
+  excerpt: text('excerpt'), // Résumé pour la liste
+  coverImage: varchar('cover_image', { length: 500 }),
+  categoryId: integer('category_id').references(() => articleCategories.id),
   authorId: uuid('author_id').notNull().references(() => users.id),
   isPublished: boolean('is_published').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -97,10 +109,18 @@ export const entriesRelations = relations(entries, ({ one }) => ({
   }),
 }));
 
+export const articleCategoriesRelations = relations(articleCategories, ({ many }) => ({
+  articles: many(articles),
+}));
+
 export const articlesRelations = relations(articles, ({ one }) => ({
   author: one(users, {
     fields: [articles.authorId],
     references: [users.id],
+  }),
+  category: one(articleCategories, {
+    fields: [articles.categoryId],
+    references: [articleCategories.id],
   }),
 }));
 
@@ -113,5 +133,7 @@ export type Emotion = typeof emotions.$inferSelect;
 export type NewEmotion = typeof emotions.$inferInsert;
 export type Entry = typeof entries.$inferSelect;
 export type NewEntry = typeof entries.$inferInsert;
+export type ArticleCategory = typeof articleCategories.$inferSelect;
+export type NewArticleCategory = typeof articleCategories.$inferInsert;
 export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;

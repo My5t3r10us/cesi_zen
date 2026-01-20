@@ -157,19 +157,6 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Indicateur d'étapes */}
-        <div className="flex items-center justify-center gap-2 py-2">
-          {['category', 'emotion', 'details'].map((s) => (
-            <div
-              key={s}
-              className={cn(
-                'h-2 rounded-full transition-all',
-                step === s ? 'w-8 bg-primary' : 'w-2 bg-muted'
-              )}
-            />
-          ))}
-        </div>
-
         {state.error && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
             {state.error}
@@ -178,7 +165,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
 
         {/* Étape 1: Catégories */}
         {step === 'category' && (
-          <div className="grid grid-cols-2 gap-3 py-4">
+          <div className="grid grid-cols-2 gap-3 pb-2">
             {Object.entries(groupedEmotions).map(([categoryId, group]) => {
               const categoryColor = group.category?.colorHex || '#888888';
               const CategoryIcon = iconMap[group.category?.iconName || 'meh'] || Meh;
@@ -209,7 +196,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
 
         {/* Étape 2: Émotions */}
         {step === 'emotion' && selectedCategoryData && (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 pb-2">
             <Button
               variant="ghost"
               size="sm"
@@ -230,8 +217,8 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
                     onClick={() => handleEmotionSelect(emotion.id)}
                     className="px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium hover:scale-105"
                     style={{
-                      borderColor: emotionColor + '50',
-                      backgroundColor: emotionColor + '10',
+                      color: emotionColor + '10',
+                      backgroundColor: emotionColor + '50',
                     }}
                   >
                     {emotion.label}
@@ -244,7 +231,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
 
         {/* Étape 3: Détails */}
         {step === 'details' && (
-          <form action={formAction} className="space-y-4 py-4">
+          <form action={formAction} className="space-y-4 pb-2">
             <Button
               type="button"
               variant="ghost"
@@ -330,6 +317,19 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
             </Button>
           </form>
         )}
+
+        {/* Indicateur d'étapes */}
+        <div className="flex items-center justify-center gap-2 py-2">
+          {['category', 'emotion', 'details'].map((s) => (
+            <div
+              key={s}
+              className={cn(
+                'h-2 rounded-full transition-all',
+                step === s ? 'w-8 bg-primary' : 'w-2 bg-muted'
+              )}
+            />
+          ))}
+        </div>
       </DialogContent>
     </Dialog>
   );

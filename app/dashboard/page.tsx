@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
       {/* Météo du jour - Bouton d'ajout d'émotion */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
-        <CardContent className="p-4 md:p-6">
+        <CardContent className="p-4 md:p-6 py-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 md:p-3 rounded-full bg-primary/10">

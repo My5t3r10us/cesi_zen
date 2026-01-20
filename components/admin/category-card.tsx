@@ -68,34 +68,48 @@ export function CategoryCard({ category }: CategoryCardProps) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
-          {category.emotions?.map((emotion) => (
-            <Badge
-              key={emotion.id}
-              variant="secondary"
-              className="flex items-center gap-2 py-1.5 px-3"
-              style={{ 
-                backgroundColor: (emotion.colorHex || category.colorHex) + '20',
-                borderColor: emotion.colorHex || category.colorHex,
-              }}
-            >
-              <span>{emotion.label}</span>
-              <div className="flex items-center gap-1 ml-1">
-                <Link href={`/admin/emotions/${emotion.id}`}>
-                  <Button variant="ghost" size="icon" className="h-5 w-5 p-0">
-                    <Edit className="h-3 w-3" />
+          {category.emotions?.map((emotion) => {
+            const emotionColor = emotion.colorHex || category.colorHex;
+            const hasCustomColor = !!emotion.colorHex;
+            
+            return (
+              <Badge
+                key={emotion.id}
+                variant="secondary"
+                className="flex items-center gap-2 py-1.5 px-3 border-2 transition-all hover:scale-105"
+                style={{ 
+                  backgroundColor: emotionColor + '20',
+                  borderColor: emotionColor,
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: emotionColor }}
+                  />
+                  <span className="font-medium">{emotion.label}</span>
+                  {hasCustomColor && (
+                    <span className="text-xs opacity-60" title="Couleur personnalisée">✨</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 ml-1">
+                  <Link href={`/admin/emotions/${emotion.id}`}>
+                    <Button variant="ghost" size="icon" className="h-5 w-5 p-0 hover:bg-white/20">
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 p-0 hover:bg-white/20"
+                    onClick={() => handleDeleteEmotion(emotion)}
+                  >
+                    <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 p-0"
-                  onClick={() => handleDeleteEmotion(emotion)}
-                >
-                  <Trash2 className="h-3 w-3 text-destructive" />
-                </Button>
-              </div>
-            </Badge>
-          ))}
+                </div>
+              </Badge>
+            );
+          })}
           {(!category.emotions || category.emotions.length === 0) && (
             <p className="text-sm text-muted-foreground italic">
               Aucune émotion dans cette catégorie

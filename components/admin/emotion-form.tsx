@@ -1,15 +1,16 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { createEmotion, updateEmotion, EmotionState } from '@/lib/actions/emotions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Emotion, EmotionCategory } from '@/lib/db/schema';
+import { generateColorVariations } from '@/lib/colors';
 
 interface EmotionFormProps {
   emotion?: Emotion & { category?: EmotionCategory };
@@ -20,8 +21,18 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
   const router = useRouter();
   const [categoryId, setCategoryId] = useState(emotion?.categoryId?.toString() || '');
   const [colorHex, setColorHex] = useState(emotion?.colorHex || '');
+  const [colorVariations, setColorVariations] = useState<string[]>([]);
 
   const selectedCategory = categories.find(c => c.id.toString() === categoryId);
+
+  useEffect(() => {
+    if (selectedCategory?.colorHex) {
+      const variations = generateColorVariations(selectedCategory.colorHex);
+      setColorVariations(variations);
+    } else {
+      setColorVariations([]);
+    }
+  }, [selectedCategory]);
 
   const action = emotion
     ? updateEmotion.bind(null, emotion.id)
@@ -91,6 +102,34 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="colorHex">Couleur personnalisée (optionnel)</Label>
+        
+        {colorVariations.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Suggestions de nuances basées sur la catégorie :
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {colorVariations.map((color, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setColorHex(color)}
+                  className="relative w-12 h-12 rounded-lg border-2 transition-all hover:scale-110"
+                  style={{ 
+                    backgroundColor: color,
+                    borderColor: colorHex === color ? '#000' : 'transparent'
+                  }}
+                  title={color}
+                >
+                  {colorHex === color && (
+                    <Check className="absolute inset-0 m-auto h-5 w-5 text-white drop-shadow-lg" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-3">
           <Input
             type="color"

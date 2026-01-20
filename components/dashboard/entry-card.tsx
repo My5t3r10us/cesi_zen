@@ -65,6 +65,7 @@ interface EntryCardProps {
       label: string;
       colorHex: string;
       iconName: string;
+      createdAt: Date;
     } | null;
   }>;
 }
@@ -165,7 +166,7 @@ export function EntryCard({ entry, emotions }: EntryCardProps) {
           <DialogHeader>
             <DialogTitle>Supprimer cette entrée ?</DialogTitle>
             <DialogDescription>
-              Cette action est irréversible. L'entrée sera définitivement supprimée.
+              Cette action est irréversible. L&apos;entrée sera définitivement supprimée.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

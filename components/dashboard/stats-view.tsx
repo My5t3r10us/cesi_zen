@@ -72,7 +72,7 @@ export function StatsView() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
-            Période d'analyse
+            Période d&apos;analyse
           </CardTitle>
           <CardDescription>
             Sélectionnez une période pour afficher vos statistiques
@@ -273,7 +273,7 @@ export function StatsView() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Évolution de l'intensité
+                  Évolution de l&apos;intensité
                 </CardTitle>
                 <CardDescription>
                   Moyenne quotidienne sur la période

@@ -15,6 +15,13 @@
       "when": 1768829714642,
       "tag": "0001_true_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768897749982,
+      "tag": "0002_wise_legion",
+      "breakpoints": true
     }
   ]
 }

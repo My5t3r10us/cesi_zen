@@ -29,8 +29,9 @@ interface JournalEntry {
   emotion: {
     id: number;
     label: string;
-    colorHex: string;
-    iconName: string;
+    colorHex: string | null;
+    iconName: string | null;
+    categoryId: number;
   } | null;
 }
 

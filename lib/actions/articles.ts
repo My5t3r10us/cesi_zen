@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { articles, articleCategories } from '@/lib/db/schema';
 import { getSession } from '@/lib/auth/session';
 import { articleSchema } from '@/lib/validation/schemas';
-import { eq, desc, asc, ilike, or } from 'drizzle-orm';
+import { eq, desc, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 export type ArticleState = {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState } from 'react';
 import { createArticle, updateArticle, ArticleState } from '@/lib/actions/articles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,10 +33,10 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
   const [categoryId, setCategoryId] = useState<string>(article?.categoryId?.toString() || '');
   const [isPublished, setIsPublished] = useState(article?.isPublished || false);
 
-  // Auto-generate slug from title
-  useEffect(() => {
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
     if (!article) {
-      const generatedSlug = title
+      const generatedSlug = newTitle
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -44,7 +44,7 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
         .replace(/(^-|-$)/g, '');
       setSlug(generatedSlug);
     }
-  }, [title, article]);
+  };
 
   const action = article 
     ? updateArticle.bind(null, article.id)
@@ -78,7 +78,7 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
           name="title"
           required
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Comment gérer son stress au quotidien"
           className="h-11"
         />

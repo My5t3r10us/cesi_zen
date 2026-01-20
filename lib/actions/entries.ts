@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { entries, emotions } from '@/lib/db/schema';
+import { entries } from '@/lib/db/schema';
 import { getSession } from '@/lib/auth/session';
 import { encryptNote, decryptNote } from '@/lib/security/encryption';
 import { entrySchema } from '@/lib/validation/schemas';

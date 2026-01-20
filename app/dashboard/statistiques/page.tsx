@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsView } from '@/components/dashboard/stats-view';
 import { BarChart3 } from 'lucide-react';
 

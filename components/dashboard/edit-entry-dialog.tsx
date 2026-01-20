@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState } from 'react';
 import { updateEntry, EntryState } from '@/lib/actions/entries';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,7 +62,7 @@ interface EditEntryDialogProps {
 
 type Step = 'category' | 'emotion' | 'details';
 
-export function EditEntryDialog({ entry, emotions, open, onOpenChange }: EditEntryDialogProps) {
+function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntryDialogProps) {
   const currentEmotion = emotions.find(e => e.id === entry.emotionId);
   
   const [step, setStep] = useState<Step>('details');
@@ -71,17 +71,6 @@ export function EditEntryDialog({ entry, emotions, open, onOpenChange }: EditEnt
   const [intensity, setIntensity] = useState([entry.intensity]);
   const [selectedTags, setSelectedTags] = useState<string[]>(entry.contextTags || []);
   const [note, setNote] = useState(entry.note || '');
-
-  // Reset form when entry changes
-  useEffect(() => {
-    const emotion = emotions.find(e => e.id === entry.emotionId);
-    setSelectedCategory(emotion?.categoryId || null);
-    setSelectedEmotion(entry.emotionId);
-    setIntensity([entry.intensity]);
-    setSelectedTags(entry.contextTags || []);
-    setNote(entry.note || '');
-    setStep('details');
-  }, [entry, emotions]);
 
   // Grouper les émotions par catégorie
   const groupedEmotions = emotions.reduce((acc, emotion) => {
@@ -244,7 +233,7 @@ export function EditEntryDialog({ entry, emotions, open, onOpenChange }: EditEnt
               onClick={() => setStep('category')}
               className="w-full"
             >
-              Changer d'émotion ({selectedEmotionData?.label})
+              Changer d&apos;émotion ({selectedEmotionData?.label})
             </Button>
 
             <input type="hidden" name="emotionId" value={selectedEmotion} />
@@ -320,4 +309,8 @@ export function EditEntryDialog({ entry, emotions, open, onOpenChange }: EditEnt
       </DialogContent>
     </Dialog>
   );
+}
+
+export function EditEntryDialog(props: EditEntryDialogProps) {
+  return <EditEntryDialogInner key={props.entry.id} {...props} />;
 }

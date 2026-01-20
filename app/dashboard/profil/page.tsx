@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Calendar, Shield } from 'lucide-react';
+import { User, Mail, Shield } from 'lucide-react';
 import { logout } from '@/lib/actions/auth';
 
 export default async function ProfilPage() {

@@ -149,7 +149,7 @@ export function Header({ user }: HeaderProps) {
                 <Link href="/login">Connexion</Link>
               </Button>
               <Button asChild>
-                <Link href="/register">S'inscrire</Link>
+                <Link href="/register">S&apos;inscrire</Link>
               </Button>
             </div>
           )}

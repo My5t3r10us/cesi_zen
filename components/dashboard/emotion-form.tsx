@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Loader2, Plus, Smile, Frown, Meh, Heart, Zap, Cloud, Sun, Moon, Flame, AlertTriangle, ThumbsDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Plus, Smile, Frown, Meh, Heart, Zap, Cloud, Sun, Moon, Flame, AlertTriangle, ThumbsDown, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Emotion, EmotionCategory } from '@/lib/db/schema';
@@ -49,7 +49,7 @@ const contextTags = [
 
 type Step = 'category' | 'emotion' | 'details';
 
-export function EmotionForm({ emotions, categories, hasTodayEntry }: EmotionFormProps) {
+export function EmotionForm({ emotions }: EmotionFormProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>('category');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -71,6 +71,15 @@ export function EmotionForm({ emotions, categories, hasTodayEntry }: EmotionForm
     return acc;
   }, {} as Record<number, { category?: EmotionCategory; emotions: EmotionWithCategory[] }>);
 
+  const resetForm = () => {
+    setStep('category');
+    setSelectedCategory(null);
+    setSelectedEmotion(null);
+    setIntensity([3]);
+    setSelectedTags([]);
+    setNote('');
+  };
+
   const [state, formAction, pending] = useActionState<EntryState, FormData>(
     async (prevState, formData) => {
       const result = await createEntry(prevState, formData);
@@ -83,15 +92,6 @@ export function EmotionForm({ emotions, categories, hasTodayEntry }: EmotionForm
     },
     {}
   );
-
-  const resetForm = () => {
-    setStep('category');
-    setSelectedCategory(null);
-    setSelectedEmotion(null);
-    setIntensity([3]);
-    setSelectedTags([]);
-    setNote('');
-  };
 
   const handleCategorySelect = (categoryId: number) => {
     setSelectedCategory(categoryId);
@@ -159,7 +159,7 @@ export function EmotionForm({ emotions, categories, hasTodayEntry }: EmotionForm
 
         {/* Indicateur d'étapes */}
         <div className="flex items-center justify-center gap-2 py-2">
-          {['category', 'emotion', 'details'].map((s, i) => (
+          {['category', 'emotion', 'details'].map((s) => (
             <div
               key={s}
               className={cn(

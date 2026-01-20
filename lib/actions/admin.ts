@@ -3,7 +3,7 @@
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { getSession } from '@/lib/auth/session';
-import { eq, desc, ne } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 export type AdminState = {

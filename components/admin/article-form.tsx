@@ -14,23 +14,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Article, ArticleCategory } from '@/lib/db/schema';
+import { RichTextEditor } from './rich-text-editor';
+import { cn } from '@/lib/utils';
 
 interface ArticleFormProps {
   article?: Article;
   categories?: ArticleCategory[];
 }
 
+type Step = 'info' | 'content';
+
 export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
   const router = useRouter();
+  const [step, setStep] = useState<Step>('info');
   const [title, setTitle] = useState(article?.title || '');
   const [slug, setSlug] = useState(article?.slug || '');
   const [excerpt, setExcerpt] = useState(article?.excerpt || '');
   const [coverImage, setCoverImage] = useState(article?.coverImage || '');
   const [categoryId, setCategoryId] = useState<string>(article?.categoryId?.toString() || '');
+  const [content, setContent] = useState(article?.content || '');
   const [isPublished, setIsPublished] = useState(article?.isPublished || false);
 
   const handleTitleChange = (newTitle: string) => {
@@ -62,16 +68,56 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
     {}
   );
 
+  const canProceedToContent = title.trim() && slug.trim();
+
   return (
-    <form action={formAction} className="space-y-6">
+    <div className="space-y-6">
       {state.error && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
           {state.error}
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="title">Titre *</Label>
+      {/* Indicateur d'étapes */}
+      <div className="flex items-center justify-center gap-2 py-4">
+        {['info', 'content'].map((s, index) => (
+          <div key={s} className="flex items-center">
+            <div
+              className={cn(
+                'flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all',
+                step === s
+                  ? 'bg-primary border-primary text-primary-foreground font-bold'
+                  : 'border-muted-foreground/30 text-muted-foreground'
+              )}
+            >
+              {index + 1}
+            </div>
+            {index < 1 && (
+              <div className={cn(
+                'w-20 h-0.5 mx-2',
+                step === 'content' ? 'bg-primary' : 'bg-muted-foreground/30'
+              )} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="text-center space-y-1">
+        <h3 className="text-lg font-semibold">
+          {step === 'info' && 'Informations de l\'article'}
+          {step === 'content' && 'Rédaction du contenu'}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {step === 'info' && 'Renseignez les informations principales'}
+          {step === 'content' && 'Rédigez le contenu de votre article'}
+        </p>
+      </div>
+
+      {/* Étape 1: Informations */}
+      {step === 'info' && (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Titre *</Label>
         <Input
           type="text"
           id="title"
@@ -157,49 +203,82 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="content">Contenu (Markdown) *</Label>
-        <Textarea
-          id="content"
-          name="content"
-          required
-          defaultValue={article?.content || ''}
-          placeholder="# Introduction&#10;&#10;Votre contenu ici..."
-          rows={15}
-          className="font-mono text-sm"
-        />
-        {state.fieldErrors?.content && (
-          <p className="text-sm text-destructive">{state.fieldErrors.content[0]}</p>
-        )}
-      </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              id="isPublished"
+              checked={isPublished}
+              onCheckedChange={setIsPublished}
+            />
+            <Label htmlFor="isPublished" className="cursor-pointer">
+              Publier l&apos;article
+            </Label>
+          </div>
 
-      <div className="flex items-center gap-3">
-        <Switch
-          id="isPublished"
-          checked={isPublished}
-          onCheckedChange={setIsPublished}
-        />
-        <input type="hidden" name="isPublished" value={isPublished ? 'true' : 'false'} />
-        <Label htmlFor="isPublished" className="cursor-pointer">
-          Publier l&apos;article
-        </Label>
-      </div>
+          <div className="flex gap-3">
+            <Button 
+              type="button" 
+              onClick={() => setStep('content')}
+              disabled={!canProceedToContent}
+              className="w-full"
+            >
+              Suivant : Rédiger le contenu
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
-      <div className="flex gap-3">
-        <Button type="submit" disabled={pending}>
-          {pending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {article ? 'Mise à jour...' : 'Création...'}
-            </>
-          ) : (
-            article ? 'Mettre à jour' : 'Créer l\'article'
-          )}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
-          Annuler
-        </Button>
-      </div>
-    </form>
+      {/* Étape 2: Contenu */}
+      {step === 'content' && (
+        <form action={formAction} className="space-y-6">
+          <input type="hidden" name="title" value={title} />
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="excerpt" value={excerpt} />
+          <input type="hidden" name="coverImage" value={coverImage} />
+          <input type="hidden" name="categoryId" value={categoryId} />
+          <input type="hidden" name="isPublished" value={isPublished ? 'true' : 'false'} />
+          <input type="hidden" name="content" value={content} />
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setStep('info')}
+            className="gap-1 -ml-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Retour aux informations
+          </Button>
+
+          <div className="space-y-2">
+            <Label>Contenu de l&apos;article *</Label>
+            <RichTextEditor
+              content={content}
+              onChange={setContent}
+              placeholder="Commencez à rédiger votre article..."
+            />
+            {state.fieldErrors?.content && (
+              <p className="text-sm text-destructive">{state.fieldErrors.content[0]}</p>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <Button type="submit" disabled={pending || !content.trim()}>
+              {pending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {article ? 'Mise à jour...' : 'Création...'}
+                </>
+              ) : (
+                article ? 'Mettre à jour l\'article' : 'Créer l\'article'
+              )}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Annuler
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }

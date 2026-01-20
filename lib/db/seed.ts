@@ -3,6 +3,7 @@ import { db } from './index';
 import { emotionCategories, emotions, users, articleCategories } from './schema';
 import { hashPassword } from '../auth/password';
 import { eq } from 'drizzle-orm';
+import { generateColorVariations } from '../colors';
 
 // Référentiel des catégories d'émotions (émotions de base)
 const categories = [
@@ -53,16 +54,22 @@ async function seed() {
     });
     
     if (category) {
-      for (const label of emotionLabels) {
+      const colorVariations = generateColorVariations(category.colorHex);
+      
+      for (let i = 0; i < emotionLabels.length; i++) {
+        const label = emotionLabels[i];
+        const colorIndex = i % colorVariations.length;
+        
         await db.insert(emotions).values({
           label,
           categoryId: category.id,
+          colorHex: colorVariations[colorIndex],
         }).onConflictDoNothing();
         emotionCount++;
       }
     }
   }
-  console.log(`✅ ${emotionCount} emotions seeded`);
+  console.log(`✅ ${emotionCount} emotions seeded with color variations`);
 
   // Seed article categories
   console.log('📰 Seeding article categories...');

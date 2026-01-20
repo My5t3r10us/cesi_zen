@@ -12,11 +12,12 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed.ts",
+    "db:migrate-colors": "tsx lib/db/migrate-colors.ts",
     "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
     "db:reset": "psql $DATABASE_URL -f reset-db.sql",
     "db:check-admin": "tsx scripts/check-admin.ts",
     "db:reset-admin": "tsx scripts/reset-admin.ts",
-    "start:prod": "drizzle-kit migrate && npm run db:seed && next start"
+    "start:prod": "drizzle-kit migrate && npm run db:migrate-colors && next start"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

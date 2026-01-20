@@ -135,7 +135,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
           Ajouter une émotion
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
             {step === 'category' && 'Comment vous sentez-vous ?'}
@@ -206,7 +206,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
               <ChevronLeft className="h-4 w-4" />
               Retour
             </Button>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {selectedCategoryData.emotions.map((emotion) => {
                 const emotionColor = emotion.colorHex || selectedCategoryData.category?.colorHex || '#888888';
                 
@@ -215,10 +215,11 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
                     key={emotion.id}
                     type="button"
                     onClick={() => handleEmotionSelect(emotion.id)}
-                    className="px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium hover:scale-105"
+                    className="px-4 py-2 rounded-lg border-2 transition-all text-md font-semibold hover:scale-105 flex justify-center items-center"
                     style={{
-                      color: emotionColor + '10',
-                      backgroundColor: emotionColor + '50',
+                      color: 'white',
+                      borderColor: emotionColor,
+                      backgroundColor: emotionColor,
                     }}
                   >
                     {emotion.label}

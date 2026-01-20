@@ -27,8 +27,20 @@ CREATE TABLE "entries" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "users" ALTER COLUMN "id" SET DATA TYPE uuid;--> statement-breakpoint
-ALTER TABLE "users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();--> statement-breakpoint
+-- Step 1: Add temporary uuid column
+ALTER TABLE "users" ADD COLUMN "id_new" uuid DEFAULT gen_random_uuid();--> statement-breakpoint
+-- Step 2: Generate UUIDs for existing rows
+UPDATE "users" SET "id_new" = gen_random_uuid();--> statement-breakpoint
+-- Step 3: Make id_new NOT NULL
+ALTER TABLE "users" ALTER COLUMN "id_new" SET NOT NULL;--> statement-breakpoint
+-- Step 4: Drop old primary key constraint
+ALTER TABLE "users" DROP CONSTRAINT "users_pkey";--> statement-breakpoint
+-- Step 5: Drop old id column
+ALTER TABLE "users" DROP COLUMN "id";--> statement-breakpoint
+-- Step 6: Rename new column to id
+ALTER TABLE "users" RENAME COLUMN "id_new" TO "id";--> statement-breakpoint
+-- Step 7: Add primary key constraint to new uuid id
+ALTER TABLE "users" ADD PRIMARY KEY ("id");--> statement-breakpoint
 ALTER TABLE "users" ALTER COLUMN "nom" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "users" ALTER COLUMN "prenom" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "users" ADD COLUMN "password_hash" varchar(255) NOT NULL;--> statement-breakpoint

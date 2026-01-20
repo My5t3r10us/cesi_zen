@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed.ts",
     "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
-    "start:prod": "drizzle-kit generate && drizzle-kit migrate && next start"
+    "db:reset": "psql $DATABASE_URL -f reset-db.sql",
+    "start:prod": "drizzle-kit migrate && next start"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

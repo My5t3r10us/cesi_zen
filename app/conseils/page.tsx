@@ -1,17 +1,47 @@
-import { getArticles, getArticleCategories } from '@/lib/actions/articles';
-import { getSession } from '@/lib/auth/session';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
 import { ArticlesList } from '@/components/conseils/articles-list';
 import { BookOpen } from 'lucide-react';
 
-export default async function ConseilsPage() {
-  const session = await getSession();
-  const articles = await getArticles(true);
-  const categories = await getArticleCategories();
+type User = { email: string; nom?: string | null; prenom?: string | null; role: 'user' | 'admin' };
+type Article = {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  categoryId?: number | null;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  author?: { id: string; email: string; nom?: string | null; prenom?: string | null } | null;
+  category?: { id: number; label: string; slug: string; colorHex: string; createdAt: string } | null;
+};
+type Category = { id: number; label: string; slug: string; colorHex: string; createdAt: string };
+
+export default function ConseilsPage() {
+  const [user, setUser] = useState<User | undefined>(undefined);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/auth/me').then((r) => r.json()),
+      fetch('/api/articles?publishedOnly=true').then((r) => r.json()),
+      fetch('/api/articles/categories').then((r) => r.json()),
+    ]).then(([me, articlesData, categoriesData]) => {
+      setUser(me ?? undefined);
+      setArticles(Array.isArray(articlesData) ? articlesData : []);
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+    }).catch(console.error);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={session ? { email: session.email, nom: session.nom, prenom: session.prenom, role: session.role } : undefined} />
+      <Header user={user} />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-4xl mx-auto">

@@ -16,7 +16,14 @@ import { BookOpen, ArrowRight, Search, SlidersHorizontal, ArrowUpDown, Calendar 
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ArticleCategory } from '@/lib/db/schema';
+
+type ArticleCategory = {
+  id: number;
+  label: string;
+  slug: string;
+  colorHex: string;
+  createdAt: Date | string;
+};
 
 type ArticleWithCategory = {
   id: string;
@@ -27,8 +34,8 @@ type ArticleWithCategory = {
   coverImage?: string | null;
   categoryId?: number | null;
   isPublished: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   author?: {
     id: string;
     email: string;

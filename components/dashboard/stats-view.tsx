@@ -10,7 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { getDetailedStats } from '@/lib/actions/entries';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, startOfQuarter, endOfQuarter, startOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
@@ -33,7 +32,19 @@ type DateRange = {
   to: Date;
 };
 
-type Stats = Awaited<ReturnType<typeof getDetailedStats>>;
+type Stats = {
+  totalEntries: number;
+  averageIntensity: number;
+  streakDays: number;
+  mostFrequentEmotion: { id: string; label: string; colorHex: string; count: number; percentage: number } | null;
+  mostFrequentCategory: { id: string; label: string; colorHex: string; count: number; percentage: number } | null;
+  emotionDistribution: { id: string; label: string; colorHex: string; count: number; percentage: number }[];
+  categoryDistribution: { id: string; label: string; colorHex: string; count: number; percentage: number }[];
+  dailyAverages: { date: string; averageIntensity: number; count: number }[];
+  weekdayDistribution: { label: string; count: number; averageIntensity: number; percentage: number }[];
+  hourDistribution: { hour: number; label: string; count: number; averageIntensity: number; percentage: number }[];
+  contextTagsDistribution: { tag: string; count: number }[];
+} | null;
 
 const presetRanges = [
   { label: 'Cette semaine', getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() }) },
@@ -54,8 +65,11 @@ export function StatsView() {
   useEffect(() => {
     async function fetchStats() {
       setLoading(true);
-      const result = await getDetailedStats(dateRange.from, dateRange.to);
-      setStats(result);
+      const res = await fetch(
+        `/api/entries/detailed-stats?startDate=${dateRange.from.toISOString()}&endDate=${dateRange.to.toISOString()}`
+      );
+      const result = await res.json();
+      setStats(result ?? null);
       setLoading(false);
     }
     fetchStats();

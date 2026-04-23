@@ -1,10 +1,21 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArticleForm } from '@/components/admin/article-form';
-import { getArticleCategories } from '@/lib/actions/articles';
 import { FileText } from 'lucide-react';
 
-export default async function NewArticlePage() {
-  const categories = await getArticleCategories();
+type Category = { id: number; label: string; slug: string; colorHex: string };
+
+export default function NewArticlePage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch('/api/articles/categories')
+      .then((r) => r.json())
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="space-y-6 w-full">

@@ -5,21 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { deleteCategory, deleteEmotion } from '@/lib/actions/emotions';
 import { toast } from 'sonner';
-import { EmotionCategory, Emotion } from '@/lib/db/schema';
+
+type EmotionCategory = { id: number; label: string; colorHex: string; iconName: string };
+type Emotion = { id: number; label: string; colorHex: string | null; iconName: string | null };
 
 interface CategoryCardProps {
   category: EmotionCategory & { emotions: Emotion[] };
+  onSuccess?: () => void;
 }
 
-export function CategoryCard({ category }: CategoryCardProps) {
+export function CategoryCard({ category, onSuccess }: CategoryCardProps) {
   const handleDeleteCategory = async () => {
     if (!confirm(`Supprimer la catégorie "${category.label}" et toutes ses émotions ?`)) return;
     
-    const result = await deleteCategory(category.id);
+    const res = await fetch(`/api/emotions/categories/${category.id}`, { method: 'DELETE' });
+    const result = await res.json();
     if (result.success) {
       toast.success('Catégorie supprimée');
+      onSuccess?.();
     } else {
       toast.error(result.error || 'Erreur');
     }
@@ -28,9 +32,11 @@ export function CategoryCard({ category }: CategoryCardProps) {
   const handleDeleteEmotion = async (emotion: Emotion) => {
     if (!confirm(`Supprimer l'émotion "${emotion.label}" ?`)) return;
     
-    const result = await deleteEmotion(emotion.id);
+    const res = await fetch(`/api/emotions/${emotion.id}`, { method: 'DELETE' });
+    const result = await res.json();
     if (result.success) {
       toast.success('Émotion supprimée');
+      onSuccess?.();
     } else {
       toast.error(result.error || 'Erreur');
     }

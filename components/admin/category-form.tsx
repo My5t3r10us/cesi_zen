@@ -1,14 +1,13 @@
-'use client';
+﻿'use client';
 
-import { useActionState, useState } from 'react';
-import { createCategory, updateCategory, EmotionState } from '@/lib/actions/emotions';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { EmotionCategory } from '@/lib/db/schema';
+type EmotionCategory = { id: number; label: string; colorHex: string; iconName: string };
 
 interface CategoryFormProps {
   category?: EmotionCategory;
@@ -22,30 +21,46 @@ const iconOptions = [
 
 export function CategoryForm({ category }: CategoryFormProps) {
   const router = useRouter();
+  const [label, setLabel] = useState(category?.label || '');
   const [colorHex, setColorHex] = useState(category?.colorHex || '#FFD700');
   const [iconName, setIconName] = useState(category?.iconName || 'smile');
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
-  const action = category
-    ? updateCategory.bind(null, category.id)
-    : createCategory;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    setFieldErrors({});
 
-  const [state, formAction, pending] = useActionState<EmotionState, FormData>(
-    async (prevState, formData) => {
-      const result = await action(prevState, formData);
-      if (result.success) {
-        toast.success(category ? 'Catégorie mise à jour !' : 'Catégorie créée !');
-        router.push('/admin/emotions');
+    const body = { label, colorHex, iconName };
+
+    const res = await fetch(
+      category ? `/api/emotions/categories/${category.id}` : '/api/emotions/categories',
+      {
+        method: category ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       }
-      return result;
-    },
-    {}
-  );
+    );
+    const result = await res.json();
+    setPending(false);
+
+    if (result.success) {
+      toast.success(category ? 'Catégorie mise à jour !' : 'Catégorie créée !');
+      router.push('/admin/emotions');
+    } else {
+      setError(result.error || 'Une erreur est survenue');
+      if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+    }
+  };
 
   return (
-    <form action={formAction} className="space-y-6">
-      {state.error && (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-          {state.error}
+          {error}
         </div>
       )}
 
@@ -54,14 +69,14 @@ export function CategoryForm({ category }: CategoryFormProps) {
         <Input
           type="text"
           id="label"
-          name="label"
           required
-          defaultValue={category?.label || ''}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
           placeholder="Ex: Joie, Colère, Peur..."
           className="h-11"
         />
-        {state.fieldErrors?.label && (
-          <p className="text-sm text-destructive">{state.fieldErrors.label[0]}</p>
+        {fieldErrors.label && (
+          <p className="text-sm text-destructive">{fieldErrors.label[0]}</p>
         )}
       </div>
 
@@ -71,7 +86,6 @@ export function CategoryForm({ category }: CategoryFormProps) {
           <Input
             type="color"
             id="colorHex"
-            name="colorHex"
             value={colorHex}
             onChange={(e) => setColorHex(e.target.value)}
             className="w-16 h-11 p-1 cursor-pointer"
@@ -88,14 +102,13 @@ export function CategoryForm({ category }: CategoryFormProps) {
             style={{ backgroundColor: colorHex }}
           />
         </div>
-        {state.fieldErrors?.colorHex && (
-          <p className="text-sm text-destructive">{state.fieldErrors.colorHex[0]}</p>
+        {fieldErrors.colorHex && (
+          <p className="text-sm text-destructive">{fieldErrors.colorHex[0]}</p>
         )}
       </div>
 
       <div className="space-y-2">
         <Label>Icône *</Label>
-        <input type="hidden" name="iconName" value={iconName} />
         <div className="grid grid-cols-5 sm:grid-cols-8 gap-2">
           {iconOptions.map((icon) => (
             <button
@@ -112,8 +125,8 @@ export function CategoryForm({ category }: CategoryFormProps) {
             </button>
           ))}
         </div>
-        {state.fieldErrors?.iconName && (
-          <p className="text-sm text-destructive">{state.fieldErrors.iconName[0]}</p>
+        {fieldErrors.iconName && (
+          <p className="text-sm text-destructive">{fieldErrors.iconName[0]}</p>
         )}
       </div>
 

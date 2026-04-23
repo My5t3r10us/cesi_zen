@@ -20,7 +20,6 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Smile, Frown, Meh, Heart, Zap, Cloud, Sun, Moon, Flame, AlertTriangle, ThumbsDown, MoreVertical, Pencil, Trash2, Loader2 } from 'lucide-react';
-import { deleteEntry } from '@/lib/actions/entries';
 import { toast } from 'sonner';
 import { EditEntryDialog } from './edit-entry-dialog';
 
@@ -68,9 +67,10 @@ interface EntryCardProps {
       createdAt: Date;
     } | null;
   }>;
+  onSuccess?: () => void;
 }
 
-export function EntryCard({ entry, emotions }: EntryCardProps) {
+export function EntryCard({ entry, emotions, onSuccess }: EntryCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -80,12 +80,14 @@ export function EntryCard({ entry, emotions }: EntryCardProps) {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const result = await deleteEntry(entry.id);
+    const res = await fetch(`/api/entries/${entry.id}`, { method: 'DELETE' });
+    const result = await res.json();
     setIsDeleting(false);
     
     if (result.success) {
       toast.success('Entrée supprimée');
       setShowDeleteDialog(false);
+      onSuccess?.();
     } else {
       toast.error(result.error || 'Erreur lors de la suppression');
     }
@@ -197,6 +199,7 @@ export function EntryCard({ entry, emotions }: EntryCardProps) {
         emotions={emotions}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onSuccess}
       />
     </>
   );

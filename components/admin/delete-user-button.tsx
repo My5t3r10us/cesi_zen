@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { deleteUser } from '@/lib/actions/admin';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,20 +16,23 @@ import { toast } from 'sonner';
 interface DeleteUserButtonProps {
   userId: string;
   userName: string;
+  onSuccess?: () => void;
 }
 
-export function DeleteUserButton({ userId, userName }: DeleteUserButtonProps) {
+export function DeleteUserButton({ userId, userName, onSuccess }: DeleteUserButtonProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
     setIsLoading(true);
-    const result = await deleteUser(userId);
+    const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+    const result = await res.json();
     setIsLoading(false);
 
     if (result.success) {
       toast.success('Compte supprimé définitivement');
       setOpen(false);
+      onSuccess?.();
     } else {
       toast.error(result.error || 'Erreur lors de la suppression');
     }

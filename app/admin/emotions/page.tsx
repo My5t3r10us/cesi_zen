@@ -1,12 +1,27 @@
-import { getEmotionCategories } from '@/lib/actions/emotions';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { CategoryCard } from '@/components/admin/category-card';
 
-export default async function EmotionsAdminPage() {
-  const categories = await getEmotionCategories();
+type Emotion = { id: number; label: string; colorHex: string | null; iconName: string | null };
+type Category = { id: number; label: string; colorHex: string; iconName: string; emotions: Emotion[] };
+
+export default function EmotionsAdminPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const fetchCategories = useCallback(async () => {
+    const res = await fetch('/api/emotions/categories');
+    const data = await res.json();
+    setCategories(Array.isArray(data) ? data : []);
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   return (
     <div className="space-y-6">
@@ -55,7 +70,7 @@ export default async function EmotionsAdminPage() {
       ) : (
         <div className="grid gap-6">
           {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
+            <CategoryCard key={category.id} category={category} onSuccess={fetchCategories} />
           ))}
         </div>
       )}

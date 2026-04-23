@@ -1,23 +1,39 @@
-import { getArticleById, getArticleCategories } from '@/lib/actions/articles';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArticleForm } from '@/components/admin/article-form';
 import { FileText } from 'lucide-react';
-import { notFound } from 'next/navigation';
 
-interface EditArticlePageProps {
-  params: Promise<{ id: string }>;
-}
+type Category = { id: number; label: string; slug: string; colorHex: string };
+type Article = {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  categoryId?: number | null;
+  isPublished: boolean;
+};
 
-export default async function EditArticlePage({ params }: EditArticlePageProps) {
-  const { id } = await params;
-  const [article, categories] = await Promise.all([
-    getArticleById(id),
-    getArticleCategories(),
-  ]);
+export default function EditArticlePage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const [article, setArticle] = useState<Article | null | undefined>(undefined);
+  const [categories, setCategories] = useState<Category[]>([]);
+  useEffect(() => {
+    Promise.all([
+      fetch(`/api/articles/${id}`).then((r) => r.json()),
+      fetch('/api/articles/categories').then((r) => r.json()),
+    ]).then(([articleData, categoriesData]) => {
+      setArticle(articleData?.id ? articleData : null);
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+    }).catch(console.error);
+  }, [id]);
 
-  if (!article) {
-    notFound();
-  }
+  if (article === null || article === undefined) return null;
 
   return (
     <div className="space-y-6 ">

@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { logout } from '@/lib/actions/auth';
+import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   user?: {
@@ -26,7 +26,14 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/');
+    router.refresh();
+  };
 
   const getInitials = () => {
     if (user?.prenom && user?.nom) {
@@ -127,13 +134,9 @@ export function Header({ user }: HeaderProps) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <form action={logout}>
-                    <button type="submit" className="flex w-full items-center cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Déconnexion
-                    </button>
-                  </form>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Déconnexion
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

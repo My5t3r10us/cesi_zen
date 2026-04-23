@@ -1,20 +1,26 @@
-import { getCategoryById } from '@/lib/actions/emotions';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CategoryForm } from '@/components/admin/category-form';
 import { FolderEdit } from 'lucide-react';
-import { notFound } from 'next/navigation';
 
-interface EditCategoryPageProps {
-  params: Promise<{ id: string }>;
-}
+type Category = { id: number; label: string; colorHex: string; iconName: string };
 
-export default async function EditCategoryPage({ params }: EditCategoryPageProps) {
-  const { id } = await params;
-  const category = await getCategoryById(parseInt(id, 10));
+export default function EditCategoryPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const [category, setCategory] = useState<Category | null | undefined>(undefined);
 
-  if (!category) {
-    notFound();
-  }
+  useEffect(() => {
+    fetch(`/api/emotions/categories/${id}`)
+      .then((r) => r.json())
+      .then((data) => setCategory(data?.id ? data : null))
+      .catch(console.error);
+  }, [id]);
+
+  if (category === undefined || category === null) return null;
 
   return (
     <div className="space-y-6 max-w-2xl">

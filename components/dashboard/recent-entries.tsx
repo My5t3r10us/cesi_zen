@@ -1,12 +1,26 @@
-import { getUserEntries, getEmotions } from '@/lib/actions/entries';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { EntryCard } from './entry-card';
 
-export async function RecentEntries() {
-  const entries = await getUserEntries();
-  const emotions = await getEmotions();
-  const recentEntries = entries.slice(0, 10);
+export function RecentEntries() {
+  const [entries, setEntries] = useState<unknown[]>([]);
+  const [emotions, setEmotions] = useState<unknown[]>([]);
 
-  if (recentEntries.length === 0) {
+  const fetchData = useCallback(async () => {
+    const [entriesData, emotionsData] = await Promise.all([
+      fetch('/api/entries').then((r) => r.json()),
+      fetch('/api/emotions').then((r) => r.json()),
+    ]);
+    setEntries(Array.isArray(entriesData) ? entriesData.slice(0, 10) : []);
+    setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (entries.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>Aucune entrée pour le moment.</p>
@@ -17,8 +31,8 @@ export async function RecentEntries() {
 
   return (
     <div className="space-y-4">
-      {recentEntries.map((entry) => (
-        <EntryCard key={entry.id} entry={entry} emotions={emotions} />
+      {(entries as Parameters<typeof EntryCard>[0]['entry'][]).map((entry) => (
+        <EntryCard key={(entry as {id: string}).id} entry={entry as Parameters<typeof EntryCard>[0]['entry']} emotions={emotions as Parameters<typeof EntryCard>[0]['emotions']} onSuccess={fetchData} />
       ))}
     </div>
   );

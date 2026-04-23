@@ -1,10 +1,28 @@
-import { getAdminStats } from '@/lib/actions/admin';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, ShieldAlert, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
-export default async function AdminDashboard() {
-  const stats = await getAdminStats();
+type AdminStats = {
+  totalUsers: number;
+  bannedUsers: number;
+  admins: number;
+  newUsersThisWeek: number;
+  totalArticles: number;
+  publishedArticles: number;
+};
+
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then((r) => r.json())
+      .then((data) => setStats(data))
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="space-y-6">

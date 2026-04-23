@@ -1,7 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useActionState, useState } from 'react';
-import { createArticle, updateArticle, ArticleState } from '@/lib/actions/articles';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,9 +16,26 @@ import {
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Article, ArticleCategory } from '@/lib/db/schema';
 import { RichTextEditor } from './rich-text-editor';
 import { cn } from '@/lib/utils';
+
+type Article = {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  categoryId?: number | null;
+  isPublished: boolean;
+};
+
+type ArticleCategory = {
+  id: number;
+  label: string;
+  slug: string;
+  colorHex: string;
+};
 
 interface ArticleFormProps {
   article?: Article;
@@ -38,6 +54,9 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
   const [categoryId, setCategoryId] = useState<string>(article?.categoryId?.toString() || '');
   const [content, setContent] = useState(article?.content || '');
   const [isPublished, setIsPublished] = useState(article?.isPublished || false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
@@ -52,29 +71,40 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
     }
   };
 
-  const action = article 
-    ? updateArticle.bind(null, article.id)
-    : createArticle;
+  const handleSubmit = async () => {
+    setPending(true);
+    setError(null);
+    setFieldErrors({});
 
-  const [state, formAction, pending] = useActionState<ArticleState, FormData>(
-    async (prevState, formData) => {
-      const result = await action(prevState, formData);
-      if (result.success) {
-        toast.success(article ? 'Article mis à jour !' : 'Article créé !');
-        router.push('/admin/articles');
+    const body = { title, slug, excerpt, coverImage, categoryId: categoryId || null, content, isPublished };
+
+    const res = await fetch(
+      article ? `/api/articles/${article.id}` : '/api/articles',
+      {
+        method: article ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       }
-      return result;
-    },
-    {}
-  );
+    );
+    const result = await res.json();
+    setPending(false);
+
+    if (result.success) {
+      toast.success(article ? 'Article mis à jour !' : 'Article créé !');
+      router.push('/admin/articles');
+    } else {
+      setError(result.error || 'Une erreur est survenue');
+      if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+    }
+  };
 
   const canProceedToContent = title.trim() && slug.trim();
 
   return (
     <div className="space-y-6">
-      {state.error && (
+      {error && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-          {state.error}
+          {error}
         </div>
       )}
 
@@ -128,8 +158,8 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
           placeholder="Comment gérer son stress au quotidien"
           className="h-11"
         />
-        {state.fieldErrors?.title && (
-          <p className="text-sm text-destructive">{state.fieldErrors.title[0]}</p>
+        {fieldErrors.title && (
+          <p className="text-sm text-destructive">{fieldErrors.title[0]}</p>
         )}
       </div>
 
@@ -148,8 +178,8 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
             className="h-11"
           />
         </div>
-        {state.fieldErrors?.slug && (
-          <p className="text-sm text-destructive">{state.fieldErrors.slug[0]}</p>
+        {fieldErrors.slug && (
+          <p className="text-sm text-destructive">{fieldErrors.slug[0]}</p>
         )}
       </div>
 
@@ -174,7 +204,6 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
               ))}
             </SelectContent>
           </Select>
-          <input type="hidden" name="categoryId" value={categoryId} />
         </div>
 
         <div className="space-y-2">
@@ -230,15 +259,7 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
 
       {/* Étape 2: Contenu */}
       {step === 'content' && (
-        <form action={formAction} className="space-y-6">
-          <input type="hidden" name="title" value={title} />
-          <input type="hidden" name="slug" value={slug} />
-          <input type="hidden" name="excerpt" value={excerpt} />
-          <input type="hidden" name="coverImage" value={coverImage} />
-          <input type="hidden" name="categoryId" value={categoryId} />
-          <input type="hidden" name="isPublished" value={isPublished ? 'true' : 'false'} />
-          <input type="hidden" name="content" value={content} />
-
+        <div className="space-y-6">
           <Button
             type="button"
             variant="ghost"
@@ -257,13 +278,13 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
               onChange={setContent}
               placeholder="Commencez à rédiger votre article..."
             />
-            {state.fieldErrors?.content && (
-              <p className="text-sm text-destructive">{state.fieldErrors.content[0]}</p>
+            {fieldErrors.content && (
+              <p className="text-sm text-destructive">{fieldErrors.content[0]}</p>
             )}
           </div>
 
           <div className="flex gap-3">
-            <Button type="submit" disabled={pending || !content.trim()}>
+            <Button type="button" onClick={handleSubmit} disabled={pending || !content.trim()}>
               {pending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -277,7 +298,7 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
               Annuler
             </Button>
           </div>
-        </form>
+        </div>
       )}
     </div>
   );

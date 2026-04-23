@@ -1,7 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useActionState, useState, useEffect } from 'react';
-import { createEmotion, updateEmotion, EmotionState } from '@/lib/actions/emotions';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Emotion, EmotionCategory } from '@/lib/db/schema';
+type Emotion = { id: number; label: string; colorHex: string | null; iconName: string | null; categoryId: number | null };
+type EmotionCategory = { id: number; label: string; colorHex: string; iconName: string };
 import { generateColorVariations } from '@/lib/colors';
 
 interface EmotionFormProps {
@@ -21,7 +21,12 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
   const router = useRouter();
   const [categoryId, setCategoryId] = useState(emotion?.categoryId?.toString() || '');
   const [colorHex, setColorHex] = useState(emotion?.colorHex || '');
+  const [label, setLabel] = useState(emotion?.label || '');
+  const [iconName, setIconName] = useState(emotion?.iconName || '');
   const [colorVariations, setColorVariations] = useState<string[]>([]);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const selectedCategory = categories.find(c => c.id.toString() === categoryId);
 
@@ -34,27 +39,39 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
     }
   }, [selectedCategory]);
 
-  const action = emotion
-    ? updateEmotion.bind(null, emotion.id)
-    : createEmotion;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    setFieldErrors({});
 
-  const [state, formAction, pending] = useActionState<EmotionState, FormData>(
-    async (prevState, formData) => {
-      const result = await action(prevState, formData);
-      if (result.success) {
-        toast.success(emotion ? 'Émotion mise à jour !' : 'Émotion créée !');
-        router.push('/admin/emotions');
+    const body = { label, categoryId: categoryId ? parseInt(categoryId, 10) : null, colorHex: colorHex || null, iconName: iconName || null };
+
+    const res = await fetch(
+      emotion ? `/api/emotions/${emotion.id}` : '/api/emotions',
+      {
+        method: emotion ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       }
-      return result;
-    },
-    {}
-  );
+    );
+    const result = await res.json();
+    setPending(false);
+
+    if (result.success) {
+      toast.success(emotion ? 'Émotion mise à jour !' : 'Émotion créée !');
+      router.push('/admin/emotions');
+    } else {
+      setError(result.error || 'Une erreur est survenue');
+      if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+    }
+  };
 
   return (
-    <form action={formAction} className="space-y-6">
-      {state.error && (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-          {state.error}
+          {error}
         </div>
       )}
 
@@ -65,18 +82,18 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
           id="label"
           name="label"
           required
-          defaultValue={emotion?.label || ''}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
           placeholder="Ex: Fierté, Frustration, Anxiété..."
           className="h-11"
         />
-        {state.fieldErrors?.label && (
-          <p className="text-sm text-destructive">{state.fieldErrors.label[0]}</p>
+        {fieldErrors.label && (
+          <p className="text-sm text-destructive">{fieldErrors.label[0]}</p>
         )}
       </div>
 
       <div className="space-y-2">
         <Label>Catégorie (émotion de base) *</Label>
-        <input type="hidden" name="categoryId" value={categoryId} />
         <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger className="h-11">
             <SelectValue placeholder="Sélectionnez une catégorie" />
@@ -95,8 +112,8 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
             ))}
           </SelectContent>
         </Select>
-        {state.fieldErrors?.categoryId && (
-          <p className="text-sm text-destructive">{state.fieldErrors.categoryId[0]}</p>
+        {fieldErrors.categoryId && (
+          <p className="text-sm text-destructive">{fieldErrors.categoryId[0]}</p>
         )}
       </div>
 
@@ -134,7 +151,6 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
           <Input
             type="color"
             id="colorHex"
-            name="colorHex"
             value={colorHex || selectedCategory?.colorHex || '#888888'}
             onChange={(e) => setColorHex(e.target.value)}
             className="w-16 h-11 p-1 cursor-pointer"
@@ -167,8 +183,8 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
         <Input
           type="text"
           id="iconName"
-          name="iconName"
-          defaultValue={emotion?.iconName || ''}
+          value={iconName}
+          onChange={(e) => setIconName(e.target.value)}
           placeholder="Hérite de la catégorie"
           className="h-11"
         />

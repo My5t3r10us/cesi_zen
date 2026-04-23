@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { updateEntry, EntryState } from '@/lib/actions/entries';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
@@ -58,11 +57,12 @@ interface EditEntryDialogProps {
   emotions: EmotionWithCategory[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 type Step = 'category' | 'emotion' | 'details';
 
-function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntryDialogProps) {
+function EditEntryDialogInner({ entry, emotions, open, onOpenChange, onSuccess }: EditEntryDialogProps) {
   const currentEmotion = emotions.find(e => e.id === entry.emotionId);
   
   const [step, setStep] = useState<Step>('details');
@@ -85,17 +85,35 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
     return acc;
   }, {} as Record<number, { category?: EmotionCategory | null; emotions: EmotionWithCategory[] }>);
 
-  const [state, formAction, pending] = useActionState<EntryState, FormData>(
-    async (prevState, formData) => {
-      const result = await updateEntry(entry.id, prevState, formData);
-      if (result.success) {
-        toast.success('Entrée modifiée');
-        onOpenChange(false);
-      }
-      return result;
-    },
-    {}
-  );
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+
+    const res = await fetch(`/api/entries/${entry.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        emotionId: selectedEmotion,
+        intensity: intensity[0],
+        note: note || null,
+        contextTags: selectedTags,
+      }),
+    });
+    const result = await res.json();
+    setPending(false);
+
+    if (result.success) {
+      toast.success('Entrée modifiée');
+      onOpenChange(false);
+      onSuccess?.();
+    } else {
+      setError(result.error || 'Une erreur est survenue');
+    }
+  };
 
   const handleCategorySelect = (categoryId: number) => {
     setSelectedCategory(categoryId);
@@ -142,9 +160,9 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
           </DialogDescription>
         </DialogHeader>
 
-        {state.error && (
+        {error && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-            {state.error}
+            {error}
           </div>
         )}
 
@@ -224,7 +242,7 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
 
         {/* Étape 3: Détails */}
         {step === 'details' && (
-          <form action={formAction} className="space-y-4 py-4">
+          <form onSubmit={handleSubmit} className="space-y-4 py-4">
             {/* Bouton pour changer d'émotion */}
             <Button
               type="button"
@@ -235,8 +253,6 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
             >
               Changer d&apos;émotion ({selectedEmotionData?.label})
             </Button>
-
-            <input type="hidden" name="emotionId" value={selectedEmotion} />
 
             {/* Intensité */}
             <div className="space-y-3">
@@ -252,7 +268,6 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
                 step={1}
                 className="py-4"
               />
-              <input type="hidden" name="intensity" value={intensity[0]} />
             </div>
 
             {/* Tags de contexte */}
@@ -270,9 +285,6 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
                   </Badge>
                 ))}
               </div>
-              {selectedTags.map(tag => (
-                <input key={tag} type="hidden" name="contextTags" value={tag} />
-              ))}
             </div>
 
             {/* Note privée */}
@@ -280,7 +292,6 @@ function EditEntryDialogInner({ entry, emotions, open, onOpenChange }: EditEntry
               <Label htmlFor="edit-note">Note privée</Label>
               <Textarea
                 id="edit-note"
-                name="note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Décrivez votre journée..."

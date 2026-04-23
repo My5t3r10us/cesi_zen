@@ -40,9 +40,10 @@ type EmotionWithCategory = {
 interface JournalCalendarProps {
   entries: JournalEntry[];
   emotions: EmotionWithCategory[];
+  onSuccess?: () => void;
 }
 
-export function JournalCalendar({ entries, emotions }: JournalCalendarProps) {
+export function JournalCalendar({ entries, emotions, onSuccess }: JournalCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   // Trouver les dates avec des entrées
@@ -93,7 +94,7 @@ export function JournalCalendar({ entries, emotions }: JournalCalendarProps) {
         ) : (
           <div className="space-y-4">
             {selectedEntries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} emotions={emotions} />
+              <EntryCard key={entry.id} entry={entry} emotions={emotions} onSuccess={onSuccess} />
             ))}
           </div>
         )}

@@ -1,20 +1,45 @@
-import { getSession } from '@/lib/auth/session';
-import { getEmotions, getUserEntries, getEntriesStats } from '@/lib/actions/entries';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmotionForm } from '@/components/dashboard/emotion-form';
 import { RecentEntries } from '@/components/dashboard/recent-entries';
 import { MoodChart } from '@/components/dashboard/mood-chart';
 import { Sun, TrendingUp, Calendar } from 'lucide-react';
 
-export default async function DashboardPage() {
-  const session = await getSession();
-  const emotions = await getEmotions();
-  const stats = await getEntriesStats();
-  
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-  const todayEntries = await getUserEntries(startOfDay, endOfDay);
+type Emotion = { id: number; label: string; colorHex: string | null; iconName: string | null; categoryId: number | null; category?: { id: number; label: string; colorHex: string; iconName: string } };
+type Entry = { id: string };
+type Stats = { totalEntries: number; dailyAverages: { date: string; averageIntensity: number; count: number }[]; recentEntries: unknown[] };
+
+export default function DashboardPage() {
+  const [session, setSession] = useState<{ prenom?: string | null } | null>(null);
+  const [emotions, setEmotions] = useState<Emotion[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [todayEntries, setTodayEntries] = useState<Entry[]>([]);
+
+  const fetchData = useCallback(async () => {
+    const today = new Date();
+    const startOfDay = new Date(today);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(today);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const [me, emotionsData, statsData, todayData] = await Promise.all([
+      fetch('/api/auth/me').then((r) => r.json()),
+      fetch('/api/emotions').then((r) => r.json()),
+      fetch('/api/entries/stats').then((r) => r.json()),
+      fetch(`/api/entries?startDate=${startOfDay.toISOString()}&endDate=${endOfDay.toISOString()}`).then((r) => r.json()),
+    ]);
+
+    setSession(me ?? null);
+    setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
+    setStats(statsData ?? null);
+    setTodayEntries(Array.isArray(todayData) ? todayData : []);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -22,6 +47,7 @@ export default async function DashboardPage() {
     if (hour < 18) return 'Bon après-midi';
     return 'Bonsoir';
   };
+
 
   return (
     <div className="space-y-6">
@@ -63,7 +89,7 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className="w-full sm:w-auto">
-              <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} />
+              <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} onSuccess={fetchData} />
             </div>
           </div>
         </CardContent>

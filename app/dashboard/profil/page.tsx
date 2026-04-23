@@ -1,10 +1,9 @@
 import { getSession } from '@/lib/auth/session';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Shield } from 'lucide-react';
-import { logout } from '@/lib/actions/auth';
+import { LogoutButton } from '@/components/layout/logout-button';
 
 export default async function ProfilPage() {
   const session = await getSession();
@@ -76,11 +75,7 @@ export default async function ProfilPage() {
           <CardTitle className="text-base md:text-lg">Actions du compte</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <form action={logout}>
-            <Button variant="outline" type="submit" className="w-full justify-start">
-              Se déconnecter
-            </Button>
-          </form>
+          <LogoutButton />
         </CardContent>
       </Card>
     </div>

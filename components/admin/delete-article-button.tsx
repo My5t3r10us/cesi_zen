@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { deleteArticle } from '@/lib/actions/articles';
 import { Button } from '@/components/ui/button';
 import { Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,20 +16,23 @@ import {
 
 interface DeleteArticleButtonProps {
   articleId: string;
+  onSuccess?: () => void;
 }
 
-export function DeleteArticleButton({ articleId }: DeleteArticleButtonProps) {
+export function DeleteArticleButton({ articleId, onSuccess }: DeleteArticleButtonProps) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const result = await deleteArticle(articleId);
+    const res = await fetch(`/api/articles/${articleId}`, { method: 'DELETE' });
+    const result = await res.json();
     setIsDeleting(false);
     
     if (result.success) {
       toast.success('Article supprimé');
       setOpen(false);
+      onSuccess?.();
     } else {
       toast.error(result.error || 'Erreur lors de la suppression');
     }

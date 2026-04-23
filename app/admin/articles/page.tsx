@@ -1,4 +1,6 @@
-import { getArticles } from '@/lib/actions/articles';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,8 +10,27 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { DeleteArticleButton } from '@/components/admin/delete-article-button';
 
-export default async function AdminArticlesPage() {
-  const articles = await getArticles(false);
+type Article = {
+  id: string;
+  title: string;
+  slug: string;
+  isPublished: boolean;
+  createdAt: string;
+  author: { email: string; nom: string | null; prenom: string | null } | null;
+};
+
+export default function AdminArticlesPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
+
+  const fetchArticles = useCallback(async () => {
+    const res = await fetch('/api/articles');
+    const data = await res.json();
+    setArticles(Array.isArray(data) ? data : []);
+  }, []);
+
+  useEffect(() => {
+    fetchArticles();
+  }, [fetchArticles]);
 
   return (
     <div className="space-y-6">
@@ -67,7 +88,7 @@ export default async function AdminArticlesPage() {
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <DeleteArticleButton articleId={article.id} />
+                    <DeleteArticleButton articleId={article.id} onSuccess={fetchArticles} />
                   </div>
                 </div>
               </CardContent>

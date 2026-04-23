@@ -1,4 +1,6 @@
-import { getUsers } from '@/lib/actions/admin';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, ShieldAlert } from 'lucide-react';
@@ -8,8 +10,28 @@ import { BanUserButton } from '@/components/admin/ban-user-button';
 import { PromoteUserButton } from '@/components/admin/promote-user-button';
 import { DeleteUserButton } from '@/components/admin/delete-user-button';
 
-export default async function AdminUsersPage() {
-  const users = await getUsers();
+type User = {
+  id: string;
+  email: string;
+  nom: string | null;
+  prenom: string | null;
+  role: 'user' | 'admin';
+  isBanned: boolean;
+  createdAt: string;
+};
+
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+
+  const fetchUsers = useCallback(async () => {
+    const res = await fetch('/api/admin/users');
+    const data = await res.json();
+    setUsers(Array.isArray(data) ? data : []);
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   return (
     <div className="space-y-6">
@@ -58,14 +80,15 @@ export default async function AdminUsersPage() {
                 </div>
                 
                 <div className="self-end sm:self-center flex gap-2">
-                  <PromoteUserButton userId={user.id} isAdmin={user.role === 'admin'} />
+                  <PromoteUserButton userId={user.id} isAdmin={user.role === 'admin'} onSuccess={fetchUsers} />
                   {user.role !== 'admin' && (
-                    <BanUserButton userId={user.id} isBanned={user.isBanned} />
+                    <BanUserButton userId={user.id} isBanned={user.isBanned} onSuccess={fetchUsers} />
                   )}
                   {user.role !== 'admin' && (
                     <DeleteUserButton
                       userId={user.id}
                       userName={`${user.prenom ?? ''} ${user.nom ?? user.email}`.trim()}
+                      onSuccess={fetchUsers}
                     />
                   )}
                 </div>

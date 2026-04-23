@@ -1,7 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
-import { register, AuthState } from '@/lib/actions/auth';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,37 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Leaf, Loader2 } from 'lucide-react';
 
+type AuthState = { error?: string; fieldErrors?: Record<string, string[]> };
+
 export default function RegisterPage() {
-  const [state, formAction, pending] = useActionState<AuthState, FormData>(register, {});
+  const router = useRouter();
+  const [state, setState] = useState<AuthState>({});
+  const [pending, setPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setState({});
+    const formData = new FormData(e.currentTarget);
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: formData.get('email'),
+        password: formData.get('password'),
+        confirmPassword: formData.get('confirmPassword'),
+        nom: formData.get('nom') || undefined,
+        prenom: formData.get('prenom') || undefined,
+      }),
+    });
+    const result = await res.json();
+    setPending(false);
+    if (result.success) {
+      router.push('/dashboard');
+    } else {
+      setState({ error: result.error, fieldErrors: result.fieldErrors });
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-secondary/30 to-background p-4 py-8">
@@ -27,7 +56,7 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {state.error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
                 {state.error}

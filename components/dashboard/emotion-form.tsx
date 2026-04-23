@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { createEntry, EntryState } from '@/lib/actions/entries';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
@@ -19,12 +18,14 @@ import { Loader2, Plus, Smile, Frown, Meh, Heart, Zap, Cloud, Sun, Moon, Flame, 
 import { cn } from '@/lib/utils';
 import { hexToRgb } from '@/lib/colors';
 import { toast } from 'sonner';
-import { Emotion, EmotionCategory } from '@/lib/db/schema';
+
+type Emotion = { id: number; label: string; colorHex: string | null; iconName: string | null; categoryId: number | null };
+type EmotionCategory = { id: number; label: string; colorHex: string; iconName: string };
+type EmotionWithCategory = Emotion & { category?: EmotionCategory };
 
 function getContrastTextColor(hex: string): string {
   const rgb = hexToRgb(hex);
   if (!rgb) return '#ffffff';
-  // Formule de luminance relative (WCAG)
   const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
   return luminance > 0.5 ? '#1a1a1a' : '#ffffff';
 }
@@ -43,12 +44,11 @@ const iconMap: Record<string, React.ElementType> = {
   'thumbs-down': ThumbsDown,
 };
 
-type EmotionWithCategory = Emotion & { category?: EmotionCategory };
-
 interface EmotionFormProps {
   emotions: EmotionWithCategory[];
   categories?: EmotionCategory[];
   hasTodayEntry?: boolean;
+  onSuccess?: () => void;
 }
 
 const contextTags = [
@@ -58,7 +58,7 @@ const contextTags = [
 
 type Step = 'category' | 'emotion' | 'details';
 
-export function EmotionForm({ emotions }: EmotionFormProps) {
+export function EmotionForm({ emotions, onSuccess }: EmotionFormProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>('category');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -66,10 +66,12 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
   const [intensity, setIntensity] = useState([3]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [note, setNote] = useState('');
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Grouper les émotions par catégorie
   const groupedEmotions = emotions.reduce((acc, emotion) => {
-    const categoryId = emotion.categoryId;
+    const categoryId = emotion.categoryId?.toString() ?? 'unknown';
     if (!acc[categoryId]) {
       acc[categoryId] = {
         category: emotion.category,
@@ -78,7 +80,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
     }
     acc[categoryId].emotions.push(emotion);
     return acc;
-  }, {} as Record<number, { category?: EmotionCategory; emotions: EmotionWithCategory[] }>);
+  }, {} as Record<string, { category?: EmotionCategory; emotions: EmotionWithCategory[] }>);
 
   const resetForm = () => {
     setStep('category');
@@ -87,20 +89,37 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
     setIntensity([3]);
     setSelectedTags([]);
     setNote('');
+    setError(null);
   };
 
-  const [state, formAction, pending] = useActionState<EntryState, FormData>(
-    async (prevState, formData) => {
-      const result = await createEntry(prevState, formData);
-      if (result.success) {
-        toast.success('Votre humeur a été enregistrée !');
-        resetForm();
-        setOpen(false);
-      }
-      return result;
-    },
-    {}
-  );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEmotion) return;
+    setPending(true);
+    setError(null);
+
+    const res = await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        emotionId: selectedEmotion,
+        intensity: intensity[0],
+        note: note || null,
+        contextTags: selectedTags,
+      }),
+    });
+    const result = await res.json();
+    setPending(false);
+
+    if (result.success) {
+      toast.success('Votre humeur a été enregistrée !');
+      resetForm();
+      setOpen(false);
+      onSuccess?.();
+    } else {
+      setError(result.error || 'Une erreur est survenue');
+    }
+  };
 
   const handleCategorySelect = (categoryId: number) => {
     setSelectedCategory(categoryId);
@@ -166,9 +185,9 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {state.error && (
+        {error && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-            {state.error}
+            {error}
           </div>
         )}
 
@@ -241,7 +260,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
 
         {/* Étape 3: Détails */}
         {step === 'details' && (
-          <form action={formAction} className="space-y-4 pb-2">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-2">
             <Button
               type="button"
               variant="ghost"
@@ -252,8 +271,6 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
               <ChevronLeft className="h-4 w-4" />
               Retour
             </Button>
-
-            <input type="hidden" name="emotionId" value={selectedEmotion || ''} />
 
             {/* Intensité */}
             <div className="space-y-3">
@@ -269,7 +286,6 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
                 step={1}
                 className="py-4"
               />
-              <input type="hidden" name="intensity" value={intensity[0]} />
             </div>
 
             {/* Tags de contexte */}
@@ -287,9 +303,6 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
                   </Badge>
                 ))}
               </div>
-              {selectedTags.map(tag => (
-                <input key={tag} type="hidden" name="contextTags" value={tag} />
-              ))}
             </div>
 
             {/* Note privée */}
@@ -297,7 +310,6 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
               <Label htmlFor="note">Note privée (optionnelle)</Label>
               <Textarea
                 id="note"
-                name="note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Décrivez votre journée, vos pensées..."

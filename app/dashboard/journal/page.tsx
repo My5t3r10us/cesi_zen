@@ -1,10 +1,28 @@
-import { getUserEntries, getEmotions } from '@/lib/actions/entries';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { JournalCalendar } from '@/components/dashboard/journal-calendar';
 import { Calendar } from 'lucide-react';
 
-export default async function JournalPage() {
-  const [entries, emotions] = await Promise.all([getUserEntries(), getEmotions()]);
+export default function JournalPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [entries, setEntries] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [emotions, setEmotions] = useState<any[]>([]);
+
+  const fetchData = useCallback(async () => {
+    const [entriesData, emotionsData] = await Promise.all([
+      fetch('/api/entries').then((r) => r.json()),
+      fetch('/api/emotions').then((r) => r.json()),
+    ]);
+    setEntries(Array.isArray(entriesData) ? entriesData : []);
+    setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <div className="space-y-6">
@@ -26,7 +44,7 @@ export default async function JournalPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:px-4 md:px-6">
-          <JournalCalendar entries={entries} emotions={emotions} />
+          <JournalCalendar entries={entries} emotions={emotions} onSuccess={fetchData} />
         </CardContent>
       </Card>
     </div>

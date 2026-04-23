@@ -1,5 +1,7 @@
-import { getArticleBySlug, getArticles } from '@/lib/actions/articles';
-import { getSession } from '@/lib/auth/session';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,32 +9,50 @@ import { ArrowLeft, BookOpen, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { notFound } from 'next/navigation';
 
-interface ArticlePageProps {
-  params: Promise<{ slug: string }>;
-}
+type UserSession = { email: string; nom?: string | null; prenom?: string | null; role: 'user' | 'admin' };
+type Article = {
+  id: string;
+  title: string;
+  content: string;
+  isPublished: boolean;
+  createdAt: string;
+  author: { email: string; nom: string | null; prenom: string | null } | null;
+};
 
-export async function generateStaticParams() {
-  const articles = await getArticles(true);
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
-}
+export default function ArticlePage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
+  const [user, setUser] = useState<UserSession | null | undefined>(undefined);
+  const [article, setArticle] = useState<Article | null | undefined>(undefined);
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { slug } = await params;
-  const session = await getSession();
-  const article = await getArticleBySlug(slug);
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/auth/me').then((r) => r.json()),
+      fetch(`/api/articles/by-slug/${slug}`).then((r) => r.json()),
+    ]).then(([me, articleData]) => {
+      setUser(me ?? null);
+      setArticle(articleData?.id && articleData.isPublished ? articleData : null);
+    }).catch(console.error);
+  }, [slug]);
 
-  if (!article || !article.isPublished) {
-    notFound();
+  if (article === undefined) return null;
+  if (article === null) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header user={user ?? undefined} />
+        <main className="container mx-auto px-4 py-8 text-center">
+          <p className="text-muted-foreground">Article non trouvé.</p>
+          <Button asChild className="mt-4"><Link href="/conseils">Retour aux conseils</Link></Button>
+        </main>
+      </div>
+    );
   }
 
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={session ? { email: session.email, nom: session.nom, prenom: session.prenom, role: session.role } : undefined} />
+      <Header user={user ?? undefined} />
 
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-3xl mx-auto">
@@ -74,7 +94,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </article>
 
           <div className="mt-6 md:mt-8 text-center">
-            {session ? (
+            {user ? (
               <>
                 <p className="text-sm md:text-base text-muted-foreground mb-1 md:mb-1">
                   Vous avez aimé cet article ?

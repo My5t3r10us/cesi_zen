@@ -1,10 +1,21 @@
-import { getEmotionCategories } from '@/lib/actions/emotions';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmotionForm } from '@/components/admin/emotion-form';
 import { Heart } from 'lucide-react';
 
-export default async function NewEmotionPage() {
-  const categories = await getEmotionCategories();
+type Category = { id: number; label: string; colorHex: string; iconName: string };
+
+export default function NewEmotionPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch('/api/emotions/categories')
+      .then((r) => r.json())
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="space-y-6 max-w-2xl">

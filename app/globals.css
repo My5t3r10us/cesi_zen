@@ -135,3 +135,90 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ══════════════════════════════════════════════
+   LANDING PAGE — ANIMATIONS & UTILITIES
+══════════════════════════════════════════════ */
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -40px) scale(1.04); }
+  66%       { transform: translate(-15px, 20px) scale(0.97); }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-25px, 30px) scale(1.05); }
+  66%       { transform: translate(20px, -15px) scale(0.96); }
+}
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(12px, 18px); }
+}
+
+@keyframes breathe-ring {
+  0%, 100% { transform: scale(1);   opacity: 0.55; }
+  50%       { transform: scale(1.6); opacity: 0.08; }
+}
+@keyframes breathe-ring-mid {
+  0%, 100% { transform: scale(1);    opacity: 0.65; }
+  50%       { transform: scale(1.35); opacity: 0.18; }
+}
+@keyframes breathe-core {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.12); }
+}
+
+@keyframes leaf-float {
+  0%, 100% { transform: translateY(0)    rotate(0deg);   }
+  50%       { transform: translateY(-18px) rotate(12deg); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes scroll-dot {
+  0%, 100% { transform: translateY(0);  opacity: 1;   }
+  50%       { transform: translateY(8px); opacity: 0.3; }
+}
+
+@keyframes gradient-shine {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* — Orbs ——————————————————————————————————— */
+.lp-orb-1 { animation: orb-float-1 10s ease-in-out infinite; }
+.lp-orb-2 { animation: orb-float-2 13s ease-in-out infinite; animation-delay: -4s; }
+.lp-orb-3 { animation: orb-float-3 15s ease-in-out infinite; animation-delay: -7s; }
+
+/* — Leaves ——————————————————————————————— */
+.lp-leaf   { animation: leaf-float 4.5s ease-in-out infinite; }
+.lp-leaf-2 { animation: leaf-float 5.5s ease-in-out infinite; animation-delay: -2s; }
+.lp-leaf-3 { animation: leaf-float 6s   ease-in-out infinite; animation-delay: -4s; }
+
+/* — Breathing ——————————————————————————— */
+.lp-breathe-outer { animation: breathe-ring     5s ease-in-out infinite; }
+.lp-breathe-mid   { animation: breathe-ring-mid 5s ease-in-out infinite; animation-delay: -0.6s; }
+.lp-breathe-core  { animation: breathe-core     5s ease-in-out infinite; }
+
+/* — Fade-up stagger ————————————————————— */
+.lp-fade-1 { animation: fade-up 0.7s ease both; animation-delay: 0.05s; opacity: 0; }
+.lp-fade-2 { animation: fade-up 0.7s ease both; animation-delay: 0.15s; opacity: 0; }
+.lp-fade-3 { animation: fade-up 0.7s ease both; animation-delay: 0.28s; opacity: 0; }
+.lp-fade-4 { animation: fade-up 0.7s ease both; animation-delay: 0.42s; opacity: 0; }
+.lp-fade-5 { animation: fade-up 0.7s ease both; animation-delay: 0.58s; opacity: 0; }
+
+/* — Scroll dot ————————————————————————— */
+.lp-scroll-dot { animation: scroll-dot 1.6s ease-in-out infinite; }
+
+/* — Feature card hover ——————————————————— */
+.lp-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.lp-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px rgba(138, 154, 91, 0.18);
+}

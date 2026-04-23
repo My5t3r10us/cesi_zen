@@ -2,22 +2,9 @@
 
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { format, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Smile, Frown, Meh, Heart, Zap, Cloud, Sun, Moon } from 'lucide-react';
-
-const iconMap: Record<string, React.ElementType> = {
-  smile: Smile,
-  frown: Frown,
-  meh: Meh,
-  heart: Heart,
-  zap: Zap,
-  cloud: Cloud,
-  sun: Sun,
-  moon: Moon,
-};
+import { EntryCard } from './entry-card';
 
 interface JournalEntry {
   id: string;
@@ -35,11 +22,27 @@ interface JournalEntry {
   } | null;
 }
 
+type EmotionWithCategory = {
+  id: number;
+  label: string;
+  colorHex?: string | null;
+  iconName?: string | null;
+  categoryId: number;
+  category?: {
+    id: number;
+    label: string;
+    colorHex: string;
+    iconName: string;
+    createdAt: Date;
+  } | null;
+};
+
 interface JournalCalendarProps {
   entries: JournalEntry[];
+  emotions: EmotionWithCategory[];
 }
 
-export function JournalCalendar({ entries }: JournalCalendarProps) {
+export function JournalCalendar({ entries, emotions }: JournalCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   // Trouver les dates avec des entrées
@@ -89,53 +92,9 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
           </p>
         ) : (
           <div className="space-y-4">
-            {selectedEntries.map((entry) => {
-              const Icon = iconMap[entry.emotion?.iconName || 'meh'] || Meh;
-              
-              return (
-                <Card key={entry.id} className="bg-muted/30">
-                  <CardContent className="pt-4">
-                    <div className="flex items-start gap-3">
-                      <div 
-                        className="p-2 rounded-full shrink-0"
-                        style={{ backgroundColor: `${entry.emotion?.colorHex || '#8A9A5B'}20` }}
-                      >
-                        <Icon 
-                          className="h-5 w-5" 
-                          style={{ color: entry.emotion?.colorHex || '#8A9A5B' }}
-                        />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{entry.emotion?.label}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(entry.createdAt), 'HH:mm')}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {entry.intensity}/10
-                          </Badge>
-                          {entry.contextTags?.map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        {entry.note && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {entry.note}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {selectedEntries.map((entry) => (
+              <EntryCard key={entry.id} entry={entry} emotions={emotions} />
+            ))}
           </div>
         )}
       </div>

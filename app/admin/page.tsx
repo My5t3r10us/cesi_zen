@@ -27,7 +27,7 @@ export default async function AdminDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3 md:gap-4">
-        <Card>
+        <Card className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
@@ -47,7 +47,7 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 md:h-5 md:w-5 text-accent" />
@@ -57,7 +57,7 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
@@ -70,7 +70,7 @@ export default async function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-        <Card>
+        <Card className='gap-0'>
           <CardHeader className="pb-3 md:pb-6">
             <CardTitle className="text-base md:text-lg">Gestion des articles</CardTitle>
             <CardDescription className="text-xs md:text-sm">
@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='gap-0'>
           <CardHeader className="pb-3 md:pb-6">
             <CardTitle className="text-base md:text-lg">Gestion des utilisateurs</CardTitle>
             <CardDescription className="text-xs md:text-sm">

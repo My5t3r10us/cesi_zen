@@ -136,7 +136,7 @@ export function ArticleForm({ article, categories = [] }: ArticleFormProps) {
       <div className="space-y-2">
         <Label htmlFor="slug">Slug (URL) *</Label>
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">/conseils/</span>
+          <span className="text-muted-foreground whitespace-nowrap">/conseils/</span>
           <Input
             type="text"
             id="slug"

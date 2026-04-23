@@ -126,12 +126,6 @@ export function Header({ user }: HeaderProps) {
                     Mon Profil
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Paramètres
-                  </Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <form action={logout}>

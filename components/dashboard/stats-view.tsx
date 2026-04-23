@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { getDetailedStats } from '@/lib/actions/entries';
-import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, startOfQuarter, endOfQuarter, startOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
   CalendarIcon, 
@@ -36,10 +36,10 @@ type DateRange = {
 type Stats = Awaited<ReturnType<typeof getDetailedStats>>;
 
 const presetRanges = [
-  { label: '7 derniers jours', getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
-  { label: '30 derniers jours', getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }) },
-  { label: '90 derniers jours', getValue: () => ({ from: subDays(new Date(), 90), to: new Date() }) },
+  { label: 'Cette semaine', getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() }) },
   { label: 'Ce mois', getValue: () => ({ from: startOfMonth(new Date()), to: new Date() }) },
+  { label: 'Ce trimestre', getValue: () => ({ from: startOfQuarter(new Date()), to: new Date() }) },
+  { label: 'Cette année', getValue: () => ({ from: startOfYear(new Date()), to: new Date() }) },
   { label: 'Mois dernier', getValue: () => ({ from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) }) },
 ];
 
@@ -181,7 +181,7 @@ export function StatsView() {
         <>
           {/* Stats principales */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
+            <Card className='pt-0'>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-primary" />
@@ -190,7 +190,7 @@ export function StatsView() {
                 <p className="text-sm text-muted-foreground mt-1">Entrées totales</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className='pt-0'>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-500" />
@@ -199,7 +199,7 @@ export function StatsView() {
                 <p className="text-sm text-muted-foreground mt-1">Intensité moyenne</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className='pt-0'>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2">
                   <Flame className="h-5 w-5 text-orange-500" />
@@ -208,7 +208,7 @@ export function StatsView() {
                 <p className="text-sm text-muted-foreground mt-1">Jours consécutifs max</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className='pt-0'>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-5 w-5 text-blue-500" />

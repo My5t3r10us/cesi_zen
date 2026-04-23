@@ -78,6 +78,75 @@ export async function toggleBanUser(userId: string): Promise<AdminState> {
   }
 }
 
+export async function deleteUser(userId: string): Promise<AdminState> {
+  const session = await getSession();
+
+  if (!session || session.role !== 'admin') {
+    return { error: 'Non autorisé' };
+  }
+
+  if (userId === session.userId) {
+    return { error: 'Vous ne pouvez pas supprimer votre propre compte' };
+  }
+
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!user) {
+      return { error: 'Utilisateur non trouvé' };
+    }
+
+    if (user.role === 'admin') {
+      return { error: 'Vous ne pouvez pas supprimer un administrateur' };
+    }
+
+    await db.delete(users).where(eq(users.id, userId));
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Delete user error:', error);
+    return { error: 'Une erreur est survenue' };
+  }
+}
+
+export async function toggleAdminRole(userId: string): Promise<AdminState> {
+  const session = await getSession();
+
+  if (!session || session.role !== 'admin') {
+    return { error: 'Non autorisé' };
+  }
+
+  // Un admin ne peut pas se rétrograder lui-même
+  if (userId === session.userId) {
+    return { error: 'Vous ne pouvez pas modifier votre propre rôle' };
+  }
+
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!user) {
+      return { error: 'Utilisateur non trouvé' };
+    }
+
+    const newRole = user.role === 'admin' ? 'user' : 'admin';
+
+    await db.update(users)
+      .set({ role: newRole })
+      .where(eq(users.id, userId));
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Toggle admin role error:', error);
+    return { error: 'Une erreur est survenue' };
+  }
+}
+
 export async function getAdminStats() {
   const session = await getSession();
   

@@ -1,10 +1,10 @@
-import { getUserEntries } from '@/lib/actions/entries';
+import { getUserEntries, getEmotions } from '@/lib/actions/entries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { JournalCalendar } from '@/components/dashboard/journal-calendar';
 import { Calendar } from 'lucide-react';
 
 export default async function JournalPage() {
-  const entries = await getUserEntries();
+  const [entries, emotions] = await Promise.all([getUserEntries(), getEmotions()]);
 
   return (
     <div className="space-y-6">
@@ -26,7 +26,7 @@ export default async function JournalPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:px-4 md:px-6">
-          <JournalCalendar entries={entries} />
+          <JournalCalendar entries={entries} emotions={emotions} />
         </CardContent>
       </Card>
     </div>

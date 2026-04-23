@@ -44,7 +44,7 @@ export default async function AdminArticlesPage() {
       ) : (
         <div className="space-y-4">
           {articles.map((article) => (
-            <Card key={article.id}>
+            <Card key={article.id} className='py-2'>
               <CardContent className="py-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">

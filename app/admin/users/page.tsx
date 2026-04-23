@@ -5,6 +5,8 @@ import { Users, ShieldAlert } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { BanUserButton } from '@/components/admin/ban-user-button';
+import { PromoteUserButton } from '@/components/admin/promote-user-button';
+import { DeleteUserButton } from '@/components/admin/delete-user-button';
 
 export default async function AdminUsersPage() {
   const users = await getUsers();
@@ -32,7 +34,7 @@ export default async function AdminUsersPage() {
       {/* Users list */}
       <div className="space-y-3">
         {users.map((user) => (
-          <Card key={user.id} className={user.isBanned ? 'border-destructive/50 bg-destructive/5' : ''}>
+          <Card key={user.id} className={user.isBanned ? 'border-destructive/50 bg-destructive/5 py-2' : 'py-2'}>
             <CardContent className="py-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -55,11 +57,18 @@ export default async function AdminUsersPage() {
                   </p>
                 </div>
                 
-                {user.role !== 'admin' && (
-                  <div className="self-end sm:self-center">
+                <div className="self-end sm:self-center flex gap-2">
+                  <PromoteUserButton userId={user.id} isAdmin={user.role === 'admin'} />
+                  {user.role !== 'admin' && (
                     <BanUserButton userId={user.id} isBanned={user.isBanned} />
-                  </div>
-                )}
+                  )}
+                  {user.role !== 'admin' && (
+                    <DeleteUserButton
+                      userId={user.id}
+                      userName={`${user.prenom ?? ''} ${user.nom ?? user.email}`.trim()}
+                    />
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

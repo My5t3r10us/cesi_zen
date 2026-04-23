@@ -92,7 +92,7 @@ export function ArticlesList({ articles, categories }: ArticlesListProps) {
 
   const getExcerpt = (article: ArticleWithCategory) => {
     if (article.excerpt) return article.excerpt;
-    return article.content.replace(/[#*`]/g, '').substring(0, 150) + '...';
+    return article.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
   };
 
   return (
@@ -109,7 +109,7 @@ export function ArticlesList({ articles, categories }: ArticlesListProps) {
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-45">
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
@@ -129,7 +129,7 @@ export function ArticlesList({ articles, categories }: ArticlesListProps) {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-          <SelectTrigger className="w-full sm:w-[160px]">
+          <SelectTrigger className="w-full sm:w-40">
             <ArrowUpDown className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
@@ -173,7 +173,7 @@ export function ArticlesList({ articles, categories }: ArticlesListProps) {
               <Card className="hover:shadow-lg transition-all hover:border-primary/30 group overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   {article.coverImage && (
-                    <div className="md:w-48 h-32 md:h-auto bg-muted flex-shrink-0">
+                    <div className="md:w-48 h-32 md:h-auto bg-muted shrink-0">
                       <img
                         src={article.coverImage}
                         alt={article.title}
@@ -200,7 +200,7 @@ export function ArticlesList({ articles, categories }: ArticlesListProps) {
                             {article.title}
                           </CardTitle>
                         </div>
-                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 hidden sm:block" />
+                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 hidden sm:block" />
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">

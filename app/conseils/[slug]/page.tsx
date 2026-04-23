@@ -29,41 +29,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
-  // Simple markdown to HTML conversion
-  const renderContent = (content: string) => {
-    return content
-      .split('\n\n')
-      .map((paragraph, index) => {
-        // Headers
-        if (paragraph.startsWith('# ')) {
-          return <h1 key={index} className="text-3xl font-bold mt-8 mb-4">{paragraph.slice(2)}</h1>;
-        }
-        if (paragraph.startsWith('## ')) {
-          return <h2 key={index} className="text-2xl font-semibold mt-6 mb-3">{paragraph.slice(3)}</h2>;
-        }
-        if (paragraph.startsWith('### ')) {
-          return <h3 key={index} className="text-xl font-semibold mt-4 mb-2">{paragraph.slice(4)}</h3>;
-        }
-        // Lists
-        if (paragraph.startsWith('- ')) {
-          const items = paragraph.split('\n').filter(line => line.startsWith('- '));
-          return (
-            <ul key={index} className="list-disc list-inside space-y-2 my-4">
-              {items.map((item, i) => (
-                <li key={i} className="text-muted-foreground">{item.slice(2)}</li>
-              ))}
-            </ul>
-          );
-        }
-        // Regular paragraph
-        return <p key={index} className="text-muted-foreground leading-relaxed my-4">{paragraph}</p>;
-      });
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header user={session ? { email: session.email, nom: session.nom, prenom: session.prenom, role: session.role } : undefined} />
-      
+
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-3xl mx-auto">
           <Button variant="ghost" asChild className="mb-4 md:mb-6 -ml-2">
@@ -79,11 +49,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 <BookOpen className="h-3 w-3" />
                 Article
               </div>
-              
+
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
                 {article.title}
               </h1>
-              
+
               <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <User className="h-3.5 w-3.5 md:h-4 md:w-4" />
@@ -98,20 +68,39 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             <Card>
               <CardContent className="py-6 md:py-8 px-4 md:px-6 prose prose-sm md:prose-lg max-w-none">
-                {renderContent(article.content)}
+                <div dangerouslySetInnerHTML={{ __html: article.content }} />
               </CardContent>
             </Card>
           </article>
 
           <div className="mt-6 md:mt-8 text-center">
-            <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
-              Cet article vous a été utile ?
-            </p>
-            <Button asChild className="w-full sm:w-auto">
-              <Link href="/register">
-                Créez votre compte CESIZen
-              </Link>
-            </Button>
+            {session ? (
+              <>
+                <p className="text-sm md:text-base text-muted-foreground mb-1 md:mb-1">
+                  Vous avez aimé cet article ?
+                </p>
+                <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
+                  Consultez nos autres conseils pour en savoir plus sur la gestion du stress et le bien-être au travail !
+                </p>
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/conseils">
+                    Consultez nos autres conseils
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
+                  Cet article vous a été utile ?
+                </p>
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/register">
+                    Créez votre compte CESIZen
+                  </Link>
+                </Button>
+              </>
+            )}
+
           </div>
         </div>
       </main>

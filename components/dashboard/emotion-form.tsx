@@ -17,8 +17,17 @@ import {
 } from '@/components/ui/dialog';
 import { Loader2, Plus, Smile, Frown, Meh, Heart, Zap, Cloud, Sun, Moon, Flame, AlertTriangle, ThumbsDown, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { hexToRgb } from '@/lib/colors';
 import { toast } from 'sonner';
 import { Emotion, EmotionCategory } from '@/lib/db/schema';
+
+function getContrastTextColor(hex: string): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return '#ffffff';
+  // Formule de luminance relative (WCAG)
+  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+  return luminance > 0.5 ? '#1a1a1a' : '#ffffff';
+}
 
 const iconMap: Record<string, React.ElementType> = {
   smile: Smile,
@@ -217,7 +226,7 @@ export function EmotionForm({ emotions }: EmotionFormProps) {
                     onClick={() => handleEmotionSelect(emotion.id)}
                     className="px-4 py-2 rounded-lg border-2 transition-all text-md font-semibold hover:scale-105 flex justify-center items-center"
                     style={{
-                      color: 'white',
+                      color: getContrastTextColor(emotionColor),
                       borderColor: emotionColor,
                       backgroundColor: emotionColor,
                     }}

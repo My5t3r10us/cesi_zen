@@ -46,7 +46,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Météo du jour - Bouton d'ajout d'émotion */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
+      <Card className="border-primary/20 bg-linear-to-br from-primary/5 to-accent/5">
         <CardContent className="px-4 md:px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -70,20 +70,20 @@ export default async function DashboardPage() {
       </Card>
 
       {/* Stats rapides */}
-      <div className="grid grid-cols-2 gap-3 md:gap-4">
-        <Card>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="text-xl md:text-2xl font-bold text-primary">{stats?.totalEntries || 0}</div>
             <p className="text-xs md:text-sm text-muted-foreground">Entrées ce mois</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card  className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="text-xl md:text-2xl font-bold text-primary">{todayEntries.length}</div>
             <p className="text-xs md:text-sm text-muted-foreground">Entrées aujourd&apos;hui</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card  className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="text-xl md:text-2xl font-bold text-primary">
               {stats?.dailyAverages?.length || 0}
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
             <p className="text-xs md:text-sm text-muted-foreground">Jours actifs</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card  className='pt-0'>
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center gap-1">
               <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-green-500" />

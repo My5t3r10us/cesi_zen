@@ -63,7 +63,7 @@
   --secondary-foreground: #2D3B2D;
   --muted: #E8EBE0; /* Beige/vert très clair */
   --muted-foreground: #5A6B5A;
-  --accent: #87CEEB; /* Bleu Ciel */
+  --accent: #E8EBE0; /* Beige/vert très clair - hover neutre */
   --accent-foreground: #1A2A1A;
   --destructive: #E57373;
   --border: #D4DBC8; /* Bordure vert très clair */

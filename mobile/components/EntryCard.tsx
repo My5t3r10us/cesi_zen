@@ -11,9 +11,9 @@ interface EntryCardProps {
 }
 
 function intensityColor(n: number): string {
-  if (n <= 3) return '#87CEEB';
-  if (n <= 6) return '#8A9A5B';
-  if (n <= 8) return '#F0E68C';
+  if (n <= 1) return '#87CEEB';
+  if (n <= 3) return '#8A9A5B';
+  if (n <= 4) return '#F0A500';
   return '#E57373';
 }
 
@@ -54,7 +54,7 @@ export function EntryCard({ entry, onPress }: EntryCardProps) {
             ]}
           >
             <Text style={[styles.intensityText, { color: iColor }]}>
-              {entry.intensity}/10
+              {entry.intensity}/5
             </Text>
           </View>
         </View>

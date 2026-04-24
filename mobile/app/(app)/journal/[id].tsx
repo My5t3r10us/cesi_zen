@@ -25,7 +25,7 @@ export default function EditEntryScreen() {
   const queryClient = useQueryClient();
 
   const [emotionId, setEmotionId] = useState<number | null>(null);
-  const [intensity, setIntensity] = useState(5);
+  const [intensity, setIntensity] = useState(3);
   const [note, setNote] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [error, setError] = useState('');

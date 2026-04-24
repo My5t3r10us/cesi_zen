@@ -1,80 +1,86 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, FontSize, FontWeight, BorderRadius } from '@/constants/theme';
+import { View, Text, StyleSheet } from 'react-native';
+import Slider from '@react-native-community/slider';
+import { Colors, FontSize, FontWeight } from '@/constants/theme';
 
 interface IntensityPickerProps {
   value: number;
   onChange: (value: number) => void;
 }
 
-const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-function levelColor(n: number): string {
-  if (n <= 3) return '#87CEEB';
-  if (n <= 6) return '#8A9A5B';
-  if (n <= 8) return '#F0E68C';
+function sliderColor(n: number): string {
+  if (n <= 1) return '#87CEEB';
+  if (n <= 3) return '#8A9A5B';
+  if (n <= 4) return '#F0A500';
   return '#E57373';
 }
 
+const LABELS: Record<number, string> = {
+  0: 'Nulle',
+  1: 'Très faible',
+  2: 'Faible',
+  3: 'Modérée',
+  4: 'Élevée',
+  5: 'Très élevée',
+};
+
 export function IntensityPicker({ value, onChange }: IntensityPickerProps) {
+  const color = sliderColor(value);
   return (
     <View style={styles.container}>
       <View style={styles.labels}>
         <Text style={styles.labelText}>Faible</Text>
         <Text style={styles.labelText}>Élevée</Text>
       </View>
-      <View style={styles.row}>
-        {LEVELS.map((n) => {
-          const isSelected = n === value;
-          const color = levelColor(n);
-          return (
-            <TouchableOpacity
-              key={n}
-              style={[
-                styles.chip,
-                { borderColor: color },
-                isSelected && { backgroundColor: color },
-              ]}
-              onPress={() => onChange(n)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.chipText, { color: isSelected ? '#fff' : color }]}>
-                {n}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+      <Slider
+        style={styles.slider}
+        minimumValue={0}
+        maximumValue={5}
+        step={1}
+        value={value}
+        onValueChange={(v) => onChange(Math.round(v))}
+        minimumTrackTintColor={color}
+        maximumTrackTintColor={Colors.border}
+        thumbTintColor={color}
+      />
+      <View style={styles.ticks}>
+        {[0, 1, 2, 3, 4, 5].map((n) => (
+          <Text
+            key={n}
+            style={[styles.tick, n === value && { color, fontWeight: FontWeight.bold }]}
+          >
+            {n}
+          </Text>
+        ))}
       </View>
       <Text style={styles.selected}>
-        Intensité sélectionnée : <Text style={styles.selectedValue}>{value}/10</Text>
+        {LABELS[value]} —{' '}
+        <Text style={[styles.selectedValue, { color }]}>{value}/5</Text>
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 8 },
+  container: { gap: 4 },
   labels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 2,
   },
   labelText: { fontSize: FontSize.xs, color: Colors.mutedForeground },
-  row: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  chip: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.card,
+  slider: { width: '100%', height: 40 },
+  ticks: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
   },
-  chipText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  tick: { fontSize: FontSize.xs, color: Colors.mutedForeground },
   selected: {
     fontSize: FontSize.sm,
     color: Colors.mutedForeground,
     textAlign: 'center',
+    marginTop: 2,
   },
-  selectedValue: { fontWeight: FontWeight.bold, color: Colors.foreground },
+  selectedValue: { fontWeight: FontWeight.bold },
 });

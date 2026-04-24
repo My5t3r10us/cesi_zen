@@ -11,7 +11,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cesizen.app"
+      "bundleIdentifier": "com.cesizen.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +29,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6c29bf1a-c972-4e85-a35b-81b9c999e2cb"
+      }
     }
   }
 }

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { entries } from '@/lib/db/schema';
-import { getSession } from '@/lib/auth/session';
+import { getSessionFromRequest } from '@/lib/auth/session';
 import { encryptNote, decryptNote } from '@/lib/security/encryption';
 import { entrySchema } from '@/lib/validation/schemas';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 export async function GET(request: NextRequest) {
-  const session = await getSession();
+  const session = await getSessionFromRequest(request);
 
   if (!session) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
+  const session = await getSessionFromRequest(request);
 
   if (!session) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });

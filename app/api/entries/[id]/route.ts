@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { entries } from '@/lib/db/schema';
-import { getSession } from '@/lib/auth/session';
+import { getSessionFromRequest } from '@/lib/auth/session';
 import { encryptNote, decryptNote } from '@/lib/security/encryption';
 import { entrySchema } from '@/lib/validation/schemas';
 import { eq, and } from 'drizzle-orm';
@@ -11,8 +11,8 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
-  const session = await getSession();
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  const session = await getSessionFromRequest(request);
 
   if (!session) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -42,7 +42,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const session = await getSession();
+  const session = await getSessionFromRequest(request);
 
   if (!session) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -95,8 +95,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
-  const session = await getSession();
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const session = await getSessionFromRequest(request);
 
   if (!session) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });

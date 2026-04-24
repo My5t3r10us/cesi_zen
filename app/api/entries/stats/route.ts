@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { entries } from '@/lib/db/schema';
-import { getSession } from '@/lib/auth/session';
+import { getSessionFromRequest } from '@/lib/auth/session';
 import { eq, and, gte } from 'drizzle-orm';
 
-export async function GET() {
-  const session = await getSession();
+export async function GET(request: NextRequest) {
+  const session = await getSessionFromRequest(request);
 
   if (!session) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
+import { NextRequest } from 'next/server';
 import { User } from '@/lib/db/schema';
 
 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-change-in-production');
@@ -57,4 +58,22 @@ export async function getSession(): Promise<SessionPayload | null> {
 export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete('session');
+}
+
+/**
+ * Lit la session depuis un Bearer token (mobile) ou le cookie (web).
+ * Non-breaking : si aucun header Authorization, retombe sur getSession().
+ */
+export async function getSessionFromRequest(request: NextRequest): Promise<SessionPayload | null> {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    try {
+      const { payload } = await jwtVerify(token, secretKey);
+      return payload as unknown as SessionPayload;
+    } catch {
+      return null;
+    }
+  }
+  return getSession();
 }

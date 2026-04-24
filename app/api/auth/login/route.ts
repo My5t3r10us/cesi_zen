@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 });
     }
 
-    await createSession(user);
+    const token = await createSession(user);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, token });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

@@ -1,0 +1,4 @@
+appId: com.cesizen.app
+---
+# Configuration partagée pour tous les flows Maestro.
+# appId est lu sur Android (com.cesizen.app) et iOS (bundleIdentifier identique).

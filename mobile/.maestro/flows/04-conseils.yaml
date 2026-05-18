@@ -1,0 +1,11 @@
+appId: com.cesizen.app
+name: Browse articles
+---
+- runFlow: 02-login.yaml
+
+# Ouvrir l'onglet Conseils
+- tapOn: "Conseils"
+
+- assertVisible:
+    text: "article|Articles|Aucun"
+    timeout: 10000

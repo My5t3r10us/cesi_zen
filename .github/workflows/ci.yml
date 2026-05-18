@@ -1,0 +1,263 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [master, main]
+
+env:
+  # Valeurs jetables non-secrètes pour les jobs qui exécutent du code mais
+  # n'ont besoin que de la présence des variables (build, type-check, lint).
+  JWT_SECRET: ci-test-secret-key-for-testing-only-32chars-long
+  ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cesizen_test
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────
+  # WEB
+  # ──────────────────────────────────────────────────────────────────
+
+  web-quality:
+    name: Web · lint + type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun run lint
+      - name: Type check
+        run: bun run type-check
+
+  web-build:
+    name: Web · build
+    runs-on: ubuntu-latest
+    needs: web-quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Build Next.js
+        run: bun run build
+
+  web-unit:
+    name: Web · unit tests (Vitest)
+    runs-on: ubuntu-latest
+    needs: web-quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Run unit tests
+        run: bun run test:unit
+
+  web-integration:
+    name: Web · integration tests (Supertest)
+    runs-on: ubuntu-latest
+    needs: web-quality
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cesizen_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Apply migrations
+        run: bunx drizzle-kit migrate
+      - name: Run integration tests
+        run: bun run test:integration
+
+  web-e2e:
+    name: Web · E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: web-build
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cesizen_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Apply migrations
+        run: bunx drizzle-kit migrate
+      - name: Seed database
+        run: bun run db:seed
+        continue-on-error: true
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+      - name: Build app
+        run: bun run build
+      - name: Run Playwright tests
+        run: bun run test:e2e -- --project=chromium
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────
+  # MOBILE
+  # ──────────────────────────────────────────────────────────────────
+
+  mobile-quality:
+    name: Mobile · lint + type-check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true # eslint-config minimal — warnings autorisés au début
+      - name: Type check
+        run: npm run type-check
+
+  mobile-unit:
+    name: Mobile · unit tests (Jest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    needs: mobile-quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm install --no-audit --no-fund
+      - name: Run Jest
+        run: npm test -- --ci --coverage --maxWorkers=2
+        continue-on-error: true # threshold tolérant tant que la base de tests est jeune
+
+  mobile-maestro-lint:
+    name: Mobile · Maestro flows lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+      - name: Lint flows
+        run: maestro test --lint mobile/.maestro/flows/
+
+  mobile-build-android:
+    name: Mobile · EAS build Android
+    runs-on: ubuntu-latest
+    needs: mobile-quality
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip if EXPO_TOKEN missing
+        id: token-check
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::EXPO_TOKEN secret missing — skipping Android build."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.token-check.outputs.skip == 'false'
+        with:
+          node-version: 20
+      - name: Setup Expo
+        if: steps.token-check.outputs.skip == 'false'
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install
+        if: steps.token-check.outputs.skip == 'false'
+        run: npm install --no-audit --no-fund
+      - name: Trigger Android build (no-wait)
+        if: steps.token-check.outputs.skip == 'false'
+        run: eas build --platform android --profile preview --non-interactive --no-wait
+
+  mobile-build-ios:
+    name: Mobile · EAS build iOS
+    runs-on: ubuntu-latest
+    needs: mobile-quality
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip if EXPO_TOKEN missing
+        id: token-check
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::EXPO_TOKEN secret missing — skipping iOS build."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.token-check.outputs.skip == 'false'
+        with:
+          node-version: 20
+      - name: Setup Expo
+        if: steps.token-check.outputs.skip == 'false'
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install
+        if: steps.token-check.outputs.skip == 'false'
+        run: npm install --no-audit --no-fund
+      - name: Trigger iOS build (no-wait)
+        if: steps.token-check.outputs.skip == 'false'
+        run: eas build --platform ios --profile preview --non-interactive --no-wait

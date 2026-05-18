@@ -1,0 +1,13 @@
+appId: com.cesizen.app
+name: Logout
+---
+- runFlow: 02-login.yaml
+
+- tapOn: "Profil"
+- assertVisible: "Se déconnecter"
+- tapOn: "Se déconnecter"
+- tapOn: "Se déconnecter"  # confirm in alert
+
+- assertVisible:
+    text: "Connexion"
+    timeout: 10000

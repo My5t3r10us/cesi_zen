@@ -1,0 +1,20 @@
+appId: com.cesizen.app
+name: Add a journal entry
+---
+- runFlow: 02-login.yaml
+
+- tapOn: "Ajouter une entrée"
+
+# Selectionner une émotion (premier item du picker)
+- assertVisible: "Émotion"
+- tapOn:
+    text: "Heureux|Triste|Calme|Stressé"
+    optional: true
+
+# Confirmer
+- tapOn: "Enregistrer l'entrée"
+
+# Retour à la home avec stats mises à jour
+- assertVisible:
+    text: "Entrées au total|Dernières entrées"
+    timeout: 10000

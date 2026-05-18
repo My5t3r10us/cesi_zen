@@ -1,0 +1,13 @@
+appId: com.cesizen.app
+name: View statistics
+---
+- runFlow: 02-login.yaml
+
+- tapOn: "Stats"
+
+- assertVisible:
+    text: "Mes statistiques"
+    timeout: 10000
+
+- tapOn: "7 jours"
+- tapOn: "90 jours"

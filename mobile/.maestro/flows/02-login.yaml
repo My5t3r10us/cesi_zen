@@ -1,0 +1,19 @@
+appId: com.cesizen.app
+name: Login flow with existing user
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "Connexion"
+
+- tapOn: "Adresse email"
+- inputText: "demo@cesizen.fr"
+
+- tapOn: "Mot de passe"
+- inputText: "Demo1234"
+
+- tapOn: "Se connecter"
+
+- assertVisible:
+    text: "Comment vous sentez-vous"
+    timeout: 10000

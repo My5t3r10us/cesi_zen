@@ -1,0 +1,29 @@
+appId: com.cesizen.app
+name: Register a new user
+---
+- launchApp:
+    clearState: true
+
+# Si on est déjà loggé, le splash redirige sur (app)/. On force la déconnexion via une nouvelle install.
+- assertVisible: "CESIZen"
+
+# Aller à l'inscription
+- tapOn: "S'inscrire"
+
+- tapOn:
+    id: "email-input"
+    optional: true
+- inputText: "maestro-${output.timestamp}@test.com"
+
+- tapOn: "Mot de passe *"
+- inputText: "Password123"
+
+- tapOn: "Confirmer le mot de passe *"
+- inputText: "Password123"
+
+- tapOn: "Créer mon compte"
+
+# Sur succès on atterrit sur l'accueil
+- assertVisible:
+    text: "Bonjour|Bon après-midi|Bonsoir"
+    timeout: 10000

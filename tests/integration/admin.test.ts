@@ -124,4 +124,123 @@ describe('Admin API', () => {
     expect(body.admins).toBeGreaterThanOrEqual(1);
     expect(body.totalArticles).toBe(0);
   });
+
+  it('GET /api/admin/stats returns 403 without admin session', async () => {
+    vi.spyOn(sessionModule, 'getSession').mockResolvedValue(null);
+    const res = await adminStatsGET();
+    expect(res.status).toBe(403);
+  });
+
+  it('PATCH user returns 403 without admin session', async () => {
+    vi.spyOn(sessionModule, 'getSession').mockResolvedValue(null);
+    const res = await userPATCH(
+      buildRequest('/api/admin/users/some-id', { method: 'PATCH', body: { action: 'toggleBan' } }),
+      { params: Promise.resolve({ id: 'some-id' }) }
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it('PATCH user returns 404 when user does not exist', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userPATCH(
+      buildRequest('/api/admin/users/00000000-0000-0000-0000-000000000000', {
+        method: 'PATCH',
+        body: { action: 'toggleBan' },
+      }),
+      { params: Promise.resolve({ id: '00000000-0000-0000-0000-000000000000' }) }
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it('PATCH user toggleRole promotes a user to admin', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    const target = await createTestUser({ email: 'promote@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userPATCH(
+      buildRequest(`/api/admin/users/${target.user.id}`, {
+        method: 'PATCH',
+        body: { action: 'toggleRole' },
+      }),
+      { params: Promise.resolve({ id: target.user.id }) }
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it('PATCH user toggleRole demotes an admin to user', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    const otherAdmin = await createTestUser({ role: 'admin', email: 'other-admin@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userPATCH(
+      buildRequest(`/api/admin/users/${otherAdmin.user.id}`, {
+        method: 'PATCH',
+        body: { action: 'toggleRole' },
+      }),
+      { params: Promise.resolve({ id: otherAdmin.user.id }) }
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it('PATCH user returns 400 on invalid action', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    const target = await createTestUser({ email: 'target2@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userPATCH(
+      buildRequest(`/api/admin/users/${target.user.id}`, {
+        method: 'PATCH',
+        body: { action: 'invalidAction' },
+      }),
+      { params: Promise.resolve({ id: target.user.id }) }
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('DELETE user returns 403 without admin session', async () => {
+    vi.spyOn(sessionModule, 'getSession').mockResolvedValue(null);
+    const res = await userDELETE(
+      buildRequest('/api/admin/users/some-id', { method: 'DELETE' }),
+      { params: Promise.resolve({ id: 'some-id' }) }
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it('DELETE user returns 400 when admin tries to delete themselves', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userDELETE(
+      buildRequest(`/api/admin/users/${admin.user.id}`, { method: 'DELETE' }),
+      { params: Promise.resolve({ id: admin.user.id }) }
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('DELETE user returns 404 when user does not exist', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userDELETE(
+      buildRequest('/api/admin/users/00000000-0000-0000-0000-000000000000', { method: 'DELETE' }),
+      { params: Promise.resolve({ id: '00000000-0000-0000-0000-000000000000' }) }
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it('DELETE user removes a regular user successfully', async () => {
+    const admin = await createTestUser({ role: 'admin', email: 'root@test.com' });
+    const target = await createTestUser({ email: 'remove@test.com' });
+    mockAdminSession(admin.user.id, admin.user.email);
+
+    const res = await userDELETE(
+      buildRequest(`/api/admin/users/${target.user.id}`, { method: 'DELETE' }),
+      { params: Promise.resolve({ id: target.user.id }) }
+    );
+    const { status, body } = await readJson<{ success: boolean }>(res);
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+  });
 });

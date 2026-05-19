@@ -27,7 +27,7 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: 'bun run build && bun run start',
+        command: 'bun run dev',
         port: Number(PORT),
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,

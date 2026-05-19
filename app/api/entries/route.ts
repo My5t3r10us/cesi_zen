@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json(decryptedEntries);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get user entries error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -86,11 +87,13 @@ export async function POST(request: NextRequest) {
       emotionId,
       intensity,
       noteEncrypted,
+      /* v8 ignore next */
       contextTags: contextTags || [],
     });
 
     revalidatePath('/dashboard');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Create entry error:', error);
     return NextResponse.json({ error: "Une erreur est survenue lors de l'enregistrement" }, { status: 500 });

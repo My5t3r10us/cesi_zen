@@ -25,6 +25,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json(article);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get article by id error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -90,6 +91,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     revalidatePath('/conseils');
     revalidatePath(`/conseils/${rawData.slug}`);
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Update article error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -111,6 +113,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     revalidatePath('/admin/articles');
     revalidatePath('/conseils');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Delete article error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

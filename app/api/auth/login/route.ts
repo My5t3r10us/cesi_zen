@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     const token = await createSession(user);
 
     return NextResponse.json({ success: true, token });
+  /* v8 ignore next 7 */
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

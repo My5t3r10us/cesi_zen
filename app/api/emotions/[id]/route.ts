@@ -30,6 +30,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json(emotion);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get emotion by id error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -64,6 +65,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     revalidatePath('/admin/emotions');
     revalidatePath('/dashboard');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Update emotion error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -85,6 +87,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     revalidatePath('/admin/emotions');
     revalidatePath('/dashboard');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Delete emotion error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

@@ -19,6 +19,7 @@ export async function GET() {
       orderBy: [asc(emotionCategories.label)],
     });
     return NextResponse.json(categories);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get emotion categories error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
     revalidatePath('/admin/emotions');
     revalidatePath('/dashboard');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Create category error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

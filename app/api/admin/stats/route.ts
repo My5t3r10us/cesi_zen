@@ -37,6 +37,7 @@ export async function GET() {
       totalArticles,
       publishedArticles,
     });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get admin stats error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

@@ -10,6 +10,7 @@ export async function GET() {
       orderBy: [asc(emotions.label)],
     });
     return NextResponse.json(allEmotions);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get emotions error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

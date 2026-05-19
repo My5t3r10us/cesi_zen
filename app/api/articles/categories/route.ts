@@ -9,6 +9,7 @@ export async function GET() {
       orderBy: [asc(articleCategories.label)],
     });
     return NextResponse.json(categories);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get article categories error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

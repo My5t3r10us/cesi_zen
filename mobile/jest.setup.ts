@@ -1,5 +1,3 @@
-import '@testing-library/jest-native/extend-expect';
-
 jest.mock('expo-secure-store', () => {
   const store = new Map<string, string>();
   return {

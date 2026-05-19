@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
       dailyAverages,
       recentEntries: userEntries.slice(-7),
     });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get entries stats error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

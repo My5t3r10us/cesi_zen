@@ -6,6 +6,7 @@ import { GET as meGET } from '@/app/api/auth/me/route';
 import { buildRequest, readJson } from '../helpers/request';
 import { resetDb } from '../helpers/db';
 import { createTestUser } from '../helpers/auth';
+import { clearTestCookies } from '../setup';
 
 describe('Auth API', () => {
   beforeAll(async () => {
@@ -13,6 +14,7 @@ describe('Auth API', () => {
   });
 
   beforeEach(async () => {
+    clearTestCookies();
     await resetDb();
   });
 
@@ -62,6 +64,17 @@ describe('Auth API', () => {
   });
 
   describe('POST /api/auth/login', () => {
+    it('rejects invalid input with 400 + fieldErrors', async () => {
+      const req = buildRequest('/api/auth/login', {
+        method: 'POST',
+        body: { email: 'not-an-email', password: 'x' },
+      });
+      const res = await loginPOST(req);
+      const { status, body } = await readJson<{ fieldErrors: Record<string, string[]> }>(res);
+      expect(status).toBe(400);
+      expect(body.fieldErrors).toBeDefined();
+    });
+
     it('authenticates an existing user', async () => {
       await createTestUser({ email: 'log@test.com', password: 'Password123' });
       const req = buildRequest('/api/auth/login', {

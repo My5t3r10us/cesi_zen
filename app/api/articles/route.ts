@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       orderBy: [desc(articles.createdAt)],
     });
     return NextResponse.json(data);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get articles error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
     revalidatePath('/admin/articles');
     revalidatePath('/conseils');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Create article error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

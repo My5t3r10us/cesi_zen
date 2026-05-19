@@ -30,7 +30,7 @@ test.describe('Auth flow', () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     // Open avatar dropdown then logout
-    await page.getByRole('button').filter({ hasText: '' }).last().click();
+    await page.getByTestId('user-menu-trigger').click();
     await page.getByRole('menuitem', { name: /déconnexion/i }).click();
     await expect(page).toHaveURL(/\/$/);
   });

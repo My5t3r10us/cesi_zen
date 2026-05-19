@@ -50,4 +50,11 @@ describe('lib/security/encryption', () => {
     const dec = await decryptNote(await encryptNote(plain));
     expect(dec).toBe(plain);
   });
+
+  it('throws when ENCRYPTION_KEY is not set', async () => {
+    const saved = process.env.ENCRYPTION_KEY;
+    delete process.env.ENCRYPTION_KEY;
+    await expect(encryptNote('test')).rejects.toThrow('ENCRYPTION_KEY environment variable is not set');
+    process.env.ENCRYPTION_KEY = saved;
+  });
 });

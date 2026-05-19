@@ -78,4 +78,12 @@ describe('lib/auth/session', () => {
     const session = await getSessionFromRequest(req);
     expect(session?.userId).toBe(fakeUser.id);
   });
+
+  it('getSession returns null when cookie contains an invalid JWT', async () => {
+    const { cookies } = await import('next/headers');
+    const store = await cookies();
+    (store as { set: (name: string, value: string) => void }).set('session', 'invalid-jwt-token');
+    const result = await getSession();
+    expect(result).toBeNull();
+  });
 });

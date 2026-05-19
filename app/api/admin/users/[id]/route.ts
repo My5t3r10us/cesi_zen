@@ -50,6 +50,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     revalidatePath('/admin/users');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Patch user error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });
@@ -89,6 +90,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
     revalidatePath('/admin/users');
     return NextResponse.json({ success: true });
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Delete user error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

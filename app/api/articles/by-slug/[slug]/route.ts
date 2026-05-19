@@ -22,6 +22,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json(article);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get article by slug error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

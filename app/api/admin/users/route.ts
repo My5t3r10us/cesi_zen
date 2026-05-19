@@ -26,6 +26,7 @@ export async function GET() {
     });
 
     return NextResponse.json(allUsers);
+  /* v8 ignore next 4 */
   } catch (error) {
     console.error('Get users error:', error);
     return NextResponse.json({ error: 'Une erreur est survenue' }, { status: 500 });

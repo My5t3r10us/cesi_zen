@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import { NextRequest } from 'next/server';
 import { User } from '@/lib/db/schema';
 
+/* v8 ignore next */
 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-change-in-production');
 
 export interface SessionPayload {

@@ -16,30 +16,28 @@ export default function DashboardPage() {
   const [emotions, setEmotions] = useState<Emotion[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [todayEntries, setTodayEntries] = useState<Entry[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
     const today = new Date();
     const startOfDay = new Date(today);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(today);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const [me, emotionsData, statsData, todayData] = await Promise.all([
-      fetch('/api/auth/me').then((r) => r.json()),
-      fetch('/api/emotions').then((r) => r.json()),
-      fetch('/api/entries/stats').then((r) => r.json()),
-      fetch(`/api/entries?startDate=${startOfDay.toISOString()}&endDate=${endOfDay.toISOString()}`).then((r) => r.json()),
-    ]);
-
-    setSession(me ?? null);
-    setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
-    setStats(statsData ?? null);
-    setTodayEntries(Array.isArray(todayData) ? todayData : []);
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    Promise.all([
+      fetch('/api/auth/me').then(r => r.json()),
+      fetch('/api/emotions').then(r => r.json()),
+      fetch('/api/entries/stats').then(r => r.json()),
+      fetch(`/api/entries?startDate=${startOfDay.toISOString()}&endDate=${endOfDay.toISOString()}`).then(r => r.json()),
+    ]).then(([me, emotionsData, statsData, todayData]) => {
+      setSession(me ?? null);
+      setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
+      setStats(statsData ?? null);
+      setTodayEntries(Array.isArray(todayData) ? todayData : []);
+    });
+  }, [refreshKey]);
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -89,7 +87,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="w-full sm:w-auto">
-              <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} onSuccess={fetchData} />
+              <EmotionForm emotions={emotions} hasTodayEntry={todayEntries.length > 0} onSuccess={refresh} />
             </div>
           </div>
         </CardContent>

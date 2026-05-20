@@ -12,16 +12,14 @@ type Category = { id: number; label: string; colorHex: string; iconName: string;
 
 export default function EmotionsAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-
-  const fetchCategories = useCallback(async () => {
-    const res = await fetch('/api/emotions/categories');
-    const data = await res.json();
-    setCategories(Array.isArray(data) ? data : []);
-  }, []);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    fetch('/api/emotions/categories')
+      .then(r => r.json())
+      .then(data => setCategories(Array.isArray(data) ? data : []));
+  }, [refreshKey]);
 
   return (
     <div className="space-y-6">
@@ -70,7 +68,7 @@ export default function EmotionsAdminPage() {
       ) : (
         <div className="grid gap-6">
           {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} onSuccess={fetchCategories} />
+            <CategoryCard key={category.id} category={category} onSuccess={refresh} />
           ))}
         </div>
       )}

@@ -36,7 +36,7 @@ export function Button({
       style={[
         styles.base,
         styles[variant],
-        styles[`size_${size}` as keyof typeof styles],
+        styles[`size_${size}` as keyof typeof styles] as ViewStyle,
         isDisabled && styles.disabled,
         style,
       ]}

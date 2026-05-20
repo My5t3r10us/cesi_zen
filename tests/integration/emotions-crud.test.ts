@@ -13,7 +13,7 @@ import { buildRequest, readJson } from '../helpers/request';
 import { resetDb, seedEmotion } from '../helpers/db';
 import { createTestUser } from '../helpers/auth';
 import { db } from '@/lib/db';
-import { emotionCategories, emotions } from '@/lib/db/schema';
+import { emotionCategories } from '@/lib/db/schema';
 import * as sessionModule from '@/lib/auth/session';
 
 function mockAdminSession(userId: string, email: string) {

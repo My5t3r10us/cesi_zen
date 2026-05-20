@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { BookOpen, ArrowRight, Search, SlidersHorizontal, ArrowUpDown, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -180,11 +181,12 @@ export function ArticlesList({ articles, categories }: ArticlesListProps) {
               <Card className="hover:shadow-lg transition-all hover:border-primary/30 group overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   {article.coverImage && (
-                    <div className="md:w-48 h-32 md:h-auto bg-muted shrink-0">
-                      <img
+                    <div className="relative md:w-48 h-32 md:h-auto bg-muted shrink-0">
+                      <Image
                         src={article.coverImage}
                         alt={article.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   )}

@@ -22,16 +22,14 @@ type User = {
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
-
-  const fetchUsers = useCallback(async () => {
-    const res = await fetch('/api/admin/users');
-    const data = await res.json();
-    setUsers(Array.isArray(data) ? data : []);
-  }, []);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetch('/api/admin/users')
+      .then(r => r.json())
+      .then(data => setUsers(Array.isArray(data) ? data : []));
+  }, [refreshKey]);
 
   return (
     <div className="space-y-6">
@@ -80,15 +78,15 @@ export default function AdminUsersPage() {
                 </div>
                 
                 <div className="self-end sm:self-center flex gap-2">
-                  <PromoteUserButton userId={user.id} isAdmin={user.role === 'admin'} onSuccess={fetchUsers} />
+                  <PromoteUserButton userId={user.id} isAdmin={user.role === 'admin'} onSuccess={refresh} />
                   {user.role !== 'admin' && (
-                    <BanUserButton userId={user.id} isBanned={user.isBanned} onSuccess={fetchUsers} />
+                    <BanUserButton userId={user.id} isBanned={user.isBanned} onSuccess={refresh} />
                   )}
                   {user.role !== 'admin' && (
                     <DeleteUserButton
                       userId={user.id}
                       userName={`${user.prenom ?? ''} ${user.nom ?? user.email}`.trim()}
-                      onSuccess={fetchUsers}
+                      onSuccess={refresh}
                     />
                   )}
                 </div>

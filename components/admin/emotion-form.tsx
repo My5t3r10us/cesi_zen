@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,20 +23,17 @@ export function EmotionForm({ emotion, categories }: EmotionFormProps) {
   const [colorHex, setColorHex] = useState(emotion?.colorHex || '');
   const [label, setLabel] = useState(emotion?.label || '');
   const [iconName, setIconName] = useState(emotion?.iconName || '');
-  const [colorVariations, setColorVariations] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const selectedCategory = categories.find(c => c.id.toString() === categoryId);
 
-  useEffect(() => {
+  const colorVariations = useMemo(() => {
     if (selectedCategory?.colorHex) {
-      const variations = generateColorVariations(selectedCategory.colorHex);
-      setColorVariations(variations);
-    } else {
-      setColorVariations([]);
+      return generateColorVariations(selectedCategory.colorHex);
     }
+    return [];
   }, [selectedCategory]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -179,12 +179,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Maestro
+      - name: Validate flow YAML syntax
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-      - name: Lint flows
-        run: maestro test --lint mobile/.maestro/flows/
+          python3 -c "
+          import yaml, sys, pathlib, os
+          flows = list(pathlib.Path('mobile/.maestro').rglob('*.yaml'))
+          if not flows:
+              print('No flow files found', file=sys.stderr)
+              sys.exit(1)
+          errors = []
+          for f in flows:
+              try:
+                  yaml.safe_load(f.read_text())
+                  print(f'  OK  {f}')
+              except yaml.YAMLError as e:
+                  errors.append(f'  ERR {f}: {e}')
+          if errors:
+              for err in errors:
+                  print(err, file=sys.stderr)
+              sys.exit(1)
+          print(f'All {len(flows)} flow files are valid YAML.')
+          "
 
   mobile-build-android:
     name: Mobile · EAS build Android

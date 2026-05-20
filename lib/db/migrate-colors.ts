@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { db } from './index';
-import { emotionCategories, emotions } from './schema';
+import { emotions } from './schema';
 import { eq } from 'drizzle-orm';
 import { generateColorVariations } from '../colors';
 

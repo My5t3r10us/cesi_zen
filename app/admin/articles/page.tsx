@@ -21,16 +21,14 @@ type Article = {
 
 export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
-
-  const fetchArticles = useCallback(async () => {
-    const res = await fetch('/api/articles');
-    const data = await res.json();
-    setArticles(Array.isArray(data) ? data : []);
-  }, []);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 
   useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+    fetch('/api/articles')
+      .then(r => r.json())
+      .then(data => setArticles(Array.isArray(data) ? data : []));
+  }, [refreshKey]);
 
   return (
     <div className="space-y-6">
@@ -88,7 +86,7 @@ export default function AdminArticlesPage() {
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <DeleteArticleButton articleId={article.id} onSuccess={fetchArticles} />
+                    <DeleteArticleButton articleId={article.id} onSuccess={refresh} />
                   </div>
                 </div>
               </CardContent>

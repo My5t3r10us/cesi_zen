@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, startOfQuarter, endOfQuarter, startOfYear } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, startOfQuarter, startOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
   CalendarIcon, 

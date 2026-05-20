@@ -87,10 +87,9 @@ describe('Articles CRUD API (/api/articles/[id])', () => {
     const admin = await createTestUser({ role: 'admin' });
     mockAdminSession(admin.user.id, admin.user.email);
 
-    const [art1] = await db
+    await db
       .insert(articles)
-      .values({ title: 'Art1', slug: 'art1', content: 'x', isPublished: true, authorId: admin.user.id })
-      .returning();
+      .values({ title: 'Art1', slug: 'art1', content: 'x', isPublished: true, authorId: admin.user.id });
     const [art2] = await db
       .insert(articles)
       .values({ title: 'Art2', slug: 'art2', content: 'x', isPublished: true, authorId: admin.user.id })

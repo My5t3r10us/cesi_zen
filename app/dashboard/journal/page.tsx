@@ -10,19 +10,18 @@ export default function JournalPage() {
   const [entries, setEntries] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [emotions, setEmotions] = useState<any[]>([]);
-
-  const fetchData = useCallback(async () => {
-    const [entriesData, emotionsData] = await Promise.all([
-      fetch('/api/entries').then((r) => r.json()),
-      fetch('/api/emotions').then((r) => r.json()),
-    ]);
-    setEntries(Array.isArray(entriesData) ? entriesData : []);
-    setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
-  }, []);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    Promise.all([
+      fetch('/api/entries').then(r => r.json()),
+      fetch('/api/emotions').then(r => r.json()),
+    ]).then(([entriesData, emotionsData]) => {
+      setEntries(Array.isArray(entriesData) ? entriesData : []);
+      setEmotions(Array.isArray(emotionsData) ? emotionsData : []);
+    });
+  }, [refreshKey]);
 
   return (
     <div className="space-y-6">
@@ -44,7 +43,7 @@ export default function JournalPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:px-4 md:px-6">
-          <JournalCalendar entries={entries} emotions={emotions} onSuccess={fetchData} />
+          <JournalCalendar entries={entries} emotions={emotions} onSuccess={refresh} />
         </CardContent>
       </Card>
     </div>

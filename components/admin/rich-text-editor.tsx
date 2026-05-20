@@ -40,7 +40,35 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+function ToolbarButton({
+  onClick,
+  isActive = false,
+  children,
+  title
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  children: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      className={cn(
+        'h-8 w-8 p-0',
+        isActive && 'bg-accent text-accent-foreground'
+      )}
+      title={title}
+    >
+      {children}
+    </Button>
+  );
+}
+
+export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [showImageInput, setShowImageInput] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -105,32 +133,6 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     editor.chain().focus().setColor(color).run();
     setTextColor(color);
   };
-
-  const ToolbarButton = ({ 
-    onClick, 
-    isActive = false, 
-    children, 
-    title 
-  }: { 
-    onClick: () => void; 
-    isActive?: boolean; 
-    children: React.ReactNode;
-    title: string;
-  }) => (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={onClick}
-      className={cn(
-        'h-8 w-8 p-0',
-        isActive && 'bg-accent text-accent-foreground'
-      )}
-      title={title}
-    >
-      {children}
-    </Button>
-  );
 
   return (
     <div className="border rounded-lg overflow-hidden">

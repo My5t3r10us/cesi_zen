@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   registerSchema,
   loginSchema,
+  profileUpdateSchema,
+  passwordChangeSchema,
+  deleteAccountSchema,
   entrySchema,
   articleSchema,
 } from '@/lib/validation/schemas';
@@ -43,6 +46,59 @@ describe('loginSchema', () => {
   });
   it('rejects empty values', () => {
     expect(loginSchema.safeParse({ email: '', password: '' }).success).toBe(false);
+  });
+});
+
+describe('profileUpdateSchema', () => {
+  it('accepts valid profile data', () => {
+    expect(profileUpdateSchema.safeParse({
+      email: 'profile@example.com',
+      nom: 'Doe',
+      prenom: 'Jane',
+      currentPassword: 'Password123',
+    }).success).toBe(true);
+  });
+
+  it('rejects invalid email', () => {
+    expect(profileUpdateSchema.safeParse({
+      email: 'bad',
+      nom: 'Doe',
+      prenom: 'Jane',
+    }).success).toBe(false);
+  });
+});
+
+describe('passwordChangeSchema', () => {
+  const valid = {
+    currentPassword: 'Password123',
+    newPassword: 'NewPassword123',
+    confirmNewPassword: 'NewPassword123',
+  };
+
+  it('accepts valid password change data', () => {
+    expect(passwordChangeSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('rejects weak new password', () => {
+    expect(passwordChangeSchema.safeParse({
+      ...valid,
+      newPassword: 'weak',
+      confirmNewPassword: 'weak',
+    }).success).toBe(false);
+  });
+
+  it('rejects mismatched confirmation', () => {
+    expect(passwordChangeSchema.safeParse({
+      ...valid,
+      confirmNewPassword: 'Different123',
+    }).success).toBe(false);
+  });
+});
+
+describe('deleteAccountSchema', () => {
+  it('requires current password', () => {
+    expect(deleteAccountSchema.safeParse({ currentPassword: 'Password123' }).success).toBe(true);
+    expect(deleteAccountSchema.safeParse({ currentPassword: '' }).success).toBe(false);
   });
 });
 

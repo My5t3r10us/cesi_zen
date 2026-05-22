@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Shield } from 'lucide-react';
 import { LogoutButton } from '@/components/layout/logout-button';
+import { ProfileSettings } from '@/components/profile/profile-settings';
 
 export default async function ProfilPage() {
   const session = await getSession();
@@ -20,7 +21,7 @@ export default async function ProfilPage() {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 max-w-2xl">
+    <div className="space-y-4 md:space-y-6 max-w-3xl">
       <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <User className="h-6 w-6 md:h-7 md:w-7 text-primary" />
@@ -78,6 +79,16 @@ export default async function ProfilPage() {
           <LogoutButton />
         </CardContent>
       </Card>
+
+      <ProfileSettings
+        initialUser={{
+          userId: session.userId,
+          email: session.email,
+          role: session.role,
+          nom: session.nom,
+          prenom: session.prenom,
+        }}
+      />
     </div>
   );
 }

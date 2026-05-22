@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Loader2, Save, ShieldCheck, Trash2 } from 'lucide-react';
+import { Cookie, Loader2, Save, ShieldCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { openCookiePreferences } from '@/components/cookies/cookie-consent';
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -260,6 +261,26 @@ export function ProfileSettings({ initialUser }: ProfileSettingsProps) {
               Mettre a jour
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3 md:pb-6">
+          <CardTitle className="text-base md:text-lg">Preferences</CardTitle>
+          <CardDescription>
+            Vous pouvez refaire votre choix concernant les cookies obligatoires.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={openCookiePreferences}
+            className="w-full justify-start sm:w-auto"
+          >
+            <Cookie className="mr-2 h-4 w-4" />
+            Refaire le choix des cookies
+          </Button>
         </CardContent>
       </Card>
 
